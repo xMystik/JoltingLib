@@ -1,0 +1,7 @@
+name: JoltingLib
+version: '1.0.0'
+main: me.skript.joltinglib.JoltingLib
+api-version: '1.20'
+load: STARTUP
+authors: [ xMystik ]
+description: The main utility library for Jolten
