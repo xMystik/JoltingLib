@@ -1,5 +1,6 @@
 package me.skript.joltinglib;
 
+import me.skript.joltinglib.colorcodes.JText;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,12 +19,12 @@ public final class JoltingLib extends JavaPlugin implements Listener {
         // Register the block break event
         Bukkit.getPluginManager().registerEvents(this, this);
 
-        getServer().getConsoleSender().sendMessage("[JoltingLib] Libraries have been enabled!");
+        getServer().getConsoleSender().sendMessage(JText.format("&3&l[JoltingLib] &7Libraries have been enabled!"));
     }
 
     @Override
     public void onDisable() {
-        getServer().getConsoleSender().sendMessage("[JoltingLib] Libraries have been disabled!");
+        getServer().getConsoleSender().sendMessage(JText.format("&3&l[JoltingLib] &7Libraries have been disabled!"));
     }
 
     @EventHandler

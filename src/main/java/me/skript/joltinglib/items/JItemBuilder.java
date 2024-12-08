@@ -1,5 +1,7 @@
 package me.skript.joltinglib.items;
 
+import me.skript.joltinglib.JoltingLib;
+import me.skript.joltinglib.colorcodes.JText;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -148,11 +150,11 @@ public class JItemBuilder {
     }
 
     public JItemBuilder addIntTag(String key, int value) {
-        return addIntTag(new NamespacedKey(JoltingAPI.getInstance(), key), value);
+        return addIntTag(new NamespacedKey(JoltingLib.getInstance(), key), value);
     }
 
     public JItemBuilder addStringTag(String key, String value) {
-        return addStringTag(new NamespacedKey(JoltingAPI.getInstance(), key), value);
+        return addStringTag(new NamespacedKey(JoltingLib.getInstance(), key), value);
     }
 
     public ItemStack build() {
