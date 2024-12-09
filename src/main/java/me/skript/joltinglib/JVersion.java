@@ -4,14 +4,29 @@ import org.bukkit.Bukkit;
 
 public class JVersion {
 
+    /**
+     * @return the current server version number
+     */
     public static String getServerVersion() {
         return Bukkit.getBukkitVersion().split("-")[0];
     }
 
-    public static boolean isVersion(String versionPrefix) {
-        return getServerVersion().startsWith(versionPrefix);
+    /**
+     * Compares the exact server version with the specified version
+     *
+     * @param targetVersion the version to check for
+     * @return true if it's the same, false otherwise
+     */
+    public static boolean isVersion(String targetVersion) {
+        return getServerVersion().startsWith(targetVersion);
     }
 
+    /**
+     * Compares the current server version with the specified version
+     *
+     * @param targetVersion the version to check for
+     * @return true if it's at least the compared version, false otherwise
+     */
     public static boolean isVersionAtLeast(String targetVersion) {
         String[] current = getServerVersion().split("\\.");
         String[] target = targetVersion.split("\\.");
@@ -30,10 +45,10 @@ public class JVersion {
     }
 
     /**
-     * Takes as input the path of a class to check of its existence.
+     * Takes as input the path of a class to check of its existence
      *
      * @param classPath a package path followed by the class name
-     * @return "True" if it exists, "False" if it does not.
+     * @return true if it exists, false otherwise
      */
     public static boolean isClassAvailable(String classPath) {
         try {
