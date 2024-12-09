@@ -8,9 +8,9 @@ import org.bukkit.plugin.Plugin;
 import java.io.*;
 import java.nio.file.Files;
 
-public class JConfigFile<T extends Plugin> {
+public class JConfigFile<P extends Plugin> {
 
-    private final T plugin;
+    private final P plugin;
     private final File file;
     private FileConfiguration config;
     private final String fileAsName;
@@ -18,7 +18,7 @@ public class JConfigFile<T extends Plugin> {
 
     //----------------------------[ ConfigFiles Constructors Start ]----------------------------//
     //Used to create a config file on the default plugins path.
-    public JConfigFile(T plugin, String fileName) {
+    public JConfigFile(P plugin, String fileName) {
         this.plugin = plugin;
         file = new File(plugin.getDataFolder(), fileName + ".yml");
         fileAsName = fileName;
@@ -29,7 +29,7 @@ public class JConfigFile<T extends Plugin> {
     }
 
     //Used to create a config file on the specified path.
-    public JConfigFile(T plugin, String fileName, String folderPathName) {
+    public JConfigFile(P plugin, String fileName, String folderPathName) {
         this.plugin = plugin;
         file = new File(plugin.getDataFolder() + "/" + folderPathName, fileName + ".yml");
         fileAsName = fileName;
@@ -40,7 +40,7 @@ public class JConfigFile<T extends Plugin> {
     }
 
     //Used to create a config file on the specified path(s).
-    public JConfigFile(T plugin, String fileName, String... folderPathName) {
+    public JConfigFile(P plugin, String fileName, String... folderPathName) {
         this.plugin = plugin;
         String path = "default";
         for(String s : folderPathName) {

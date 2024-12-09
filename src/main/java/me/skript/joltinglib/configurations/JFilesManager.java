@@ -6,16 +6,16 @@ import org.bukkit.plugin.Plugin;
 import java.io.*;
 import java.util.*;
 
-public class JFilesManager<T extends Plugin> {
+public class JFilesManager<P extends Plugin> {
 
-    private final T plugin;
-    private final HashMap<String, JConfigFile<T>> filesMap = new HashMap<>();
+    private final P plugin;
+    private final HashMap<String, JConfigFile<P>> filesMap = new HashMap<>();
 
     //------------------------------[ Manager Constructors Start ]-----------------------------//
     //We're making the constructors that initializes the file manager.
     //We're initializing the files manager by specifying the plugin.
     // We're initializing the files manager by specifying the plugin.
-    public JFilesManager(T plugin) {
+    public JFilesManager(P plugin) {
         this.plugin = plugin;
     }
     //-------------------------------[ Manager Constructors End ]------------------------------//
@@ -68,7 +68,7 @@ public class JFilesManager<T extends Plugin> {
 
     //------------------------------------[ Methods Start ]------------------------------------//
     // Used to delete a configuration file.
-    public void deleteFile(JConfigFile<T> fileName) {
+    public void deleteFile(JConfigFile<P> fileName) {
         if (fileName.getConfigFile().exists()) {
             fileName.getConfigFile().delete();
             filesMap.remove(fileName.getFolderPath());
@@ -78,19 +78,19 @@ public class JFilesManager<T extends Plugin> {
     }
 
     // Used to return a specific configuration file.
-    public JConfigFile<T> getFile(String fileName) {
+    public JConfigFile<P> getFile(String fileName) {
         return filesMap.get(fileName);
     }
 
     // Used to return all configuration files as a HashMap.
-    public HashMap<String, JConfigFile<T>> getAllRegisteredConfigs() {
+    public HashMap<String, JConfigFile<P>> getAllRegisteredConfigs() {
         return filesMap;
     }
 
     // Used to return a HashMap with all the paths and configs on the specified folder.
-    public HashMap<String, JConfigFile<T>> getAllConfigs(String filesPath) {
-        HashMap<String, JConfigFile<T>> map = new HashMap<>();
-        for (Map.Entry<String, JConfigFile<T>> file : filesMap.entrySet()) {
+    public HashMap<String, JConfigFile<P>> getAllConfigs(String filesPath) {
+        HashMap<String, JConfigFile<P>> map = new HashMap<>();
+        for (Map.Entry<String, JConfigFile<P>> file : filesMap.entrySet()) {
             String fileName = filesMap.get(file.getKey()).getConfigFile().getName();
             String path = file.getKey().replace("/" + fileName, "");
             if (path.equals(filesPath)) {
@@ -101,8 +101,8 @@ public class JFilesManager<T extends Plugin> {
     }
 
     // Used to return a HashMap with all the paths and configs of the specified folder even if they are not registered.
-    public HashMap<String, JConfigFile<T>> getAllFiles(String filesPath) {
-        HashMap<String, JConfigFile<T>> map = new HashMap<>();
+    public HashMap<String, JConfigFile<P>> getAllFiles(String filesPath) {
+        HashMap<String, JConfigFile<P>> map = new HashMap<>();
         String folderPath;
 
         if (filesPath.contains("/")) {
@@ -117,7 +117,7 @@ public class JFilesManager<T extends Plugin> {
             folder = new File(plugin.getDataFolder() + "");
             for (File file : folder.listFiles()) {
                 if (!file.isDirectory()) {
-                    JConfigFile<T> confFile = fileSetup(file.getName().replace(".yml", ""));
+                    JConfigFile<P> confFile = fileSetup(file.getName().replace(".yml", ""));
                     map.put(folderPath + "/" + file.getName(), confFile);
                     filesMap.put(folderPath + "/" + file.getName(), confFile);
                 }
@@ -126,7 +126,7 @@ public class JFilesManager<T extends Plugin> {
             folder = new File(plugin.getDataFolder() + "/" + folderPath);
             for (File file : folder.listFiles()) {
                 if (!file.isDirectory()) {
-                    JConfigFile<T> confFile = fileSetup(file.getName().replace(".yml", ""), folderPath);
+                    JConfigFile<P> confFile = fileSetup(file.getName().replace(".yml", ""), folderPath);
                     map.put("default/" + folderPath + "/" + file.getName(), confFile);
                     filesMap.put("default/" + folderPath + "/" + file.getName(), confFile);
                 }
