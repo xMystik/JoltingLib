@@ -7,6 +7,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class JNBT {
@@ -36,12 +38,12 @@ public class JNBT {
     }
 
     /**
-     * Adds certain data to the specified item
+     * Adds certain data to the specified item.
      *
-     * @param item the item that will receive the data
-     * @param type {@link PersistentDataType} available data types
-     * @param key the key to store data into
-     * @param value data to store
+     * @param item  the item that will receive the data
+     * @param type  {@link PersistentDataType} available data types
+     * @param key   the key to store data into
+     * @param value the data to store
      */
     public static <K, V> void addData(ItemStack item, PersistentDataType<K, V> type, String key, V value) {
         if (item == null || item.getItemMeta() == null) {
@@ -80,9 +82,32 @@ public class JNBT {
     }
 
     /**
-     * Clears all the available data from the specified item
+     * Retrieves all tags present on the item.
      *
-     * @param item to clear the data
+     * @param item the item to get the tags from
+     * @return a list of all tag keys, or an empty list if no tags are found
+     */
+    public static List<String> getAllTags(ItemStack item) {
+        List<String> tags = new ArrayList<>();
+
+        if (item == null || item.getItemMeta() == null) {
+            return tags;
+        }
+
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        Set<NamespacedKey> keys = container.getKeys();
+
+        for (NamespacedKey key : keys) {
+            tags.add(key.getKey());
+        }
+
+        return tags;
+    }
+
+    /**
+     * Clears all the available data from the specified item.
+     *
+     * @param item the item to clear the data
      */
     public static void clearAllData(ItemStack item) {
         if (item == null || item.getItemMeta() == null) {
@@ -92,9 +117,11 @@ public class JNBT {
         ItemMeta meta = item.getItemMeta();
         PersistentDataContainer container = meta.getPersistentDataContainer();
         Set<NamespacedKey> keys = container.getKeys();
+
         for (NamespacedKey key : keys) {
             container.remove(key);
         }
+
         item.setItemMeta(meta);
     }
 }

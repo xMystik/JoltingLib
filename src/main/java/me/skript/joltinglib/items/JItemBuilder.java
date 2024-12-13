@@ -2,6 +2,7 @@ package me.skript.joltinglib.items;
 
 import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.colorcodes.JText;
+import me.skript.joltinglib.nbt.JNBT;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -129,7 +130,7 @@ public class JItemBuilder {
         return this;
     }
 
-    public JItemBuilder setItemFlags(ItemFlag... flags) {
+    public JItemBuilder addItemFlags(ItemFlag... flags) {
         meta.addItemFlags(flags);
         return this;
     }
@@ -139,22 +140,12 @@ public class JItemBuilder {
         return this;
     }
 
-    public JItemBuilder addIntTag(NamespacedKey key, int value) {
-        meta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, value);
+    public <K, V> JItemBuilder addData(PersistentDataType<K, V> type, String key, V value) {
+        if (meta != null) {
+            meta.getPersistentDataContainer().set(new NamespacedKey(JoltingLib.getInstance(), key), type, value);
+            item.setItemMeta(meta);
+        }
         return this;
-    }
-
-    public JItemBuilder addStringTag(NamespacedKey key, String value) {
-        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, value);
-        return this;
-    }
-
-    public JItemBuilder addIntTag(String key, int value) {
-        return addIntTag(new NamespacedKey(JoltingLib.getInstance(), key), value);
-    }
-
-    public JItemBuilder addStringTag(String key, String value) {
-        return addStringTag(new NamespacedKey(JoltingLib.getInstance(), key), value);
     }
 
     public ItemStack build() {
