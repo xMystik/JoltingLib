@@ -2,7 +2,6 @@ package me.skript.joltinglib.items;
 
 import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.colorcodes.JText;
-import me.skript.joltinglib.nbt.JNBT;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
