@@ -1,6 +1,5 @@
 package me.skript.joltinglib.items;
 
-import me.skript.joltinglib.JVersion;
 import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.colorcodes.JText;
 import net.kyori.adventure.text.Component;

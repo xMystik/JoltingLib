@@ -40,9 +40,9 @@ public class JNBT {
     /**
      * Adds certain data to the specified item.
      *
-     * @param item  the item that will receive the data
-     * @param type  {@link PersistentDataType} available data types
-     * @param key   the key to store data into
+     * @param item the item that will receive the data
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to store data into
      * @param value the data to store
      */
     public static <K, V> void addData(ItemStack item, PersistentDataType<K, V> type, String key, V value) {
