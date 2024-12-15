@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -199,10 +200,8 @@ public class JGlow {
      */
     public void addGlowToBlock(Block block, Player receiver, ChatColor color) {
         try {
-            if (isSolidBlockWithVisibleTexture(block)) {
+            if (isAllowedBlock(block)) {
                 glowingBlocks.setGlowing(block, receiver, color);
-            } else {
-                receiver.sendMessage("This block cannot glow because it is either not solid or has no visible texture.");
             }
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
@@ -219,11 +218,8 @@ public class JGlow {
     public void addGlowToBlock(Block block, List<Player> viewers, ChatColor color) {
         for (Player viewer : viewers) {
             if (viewer.isOnline()) {
-                // Check if the block is solid and has a visible texture
-                if (isSolidBlockWithVisibleTexture(block)) {
+                if (isAllowedBlock(block)) {
                     addGlowToBlock(block, viewer, color);
-                } else {
-                    viewer.sendMessage("This block cannot glow because it is either not solid or has no visible texture.");
                 }
             }
         }
@@ -238,12 +234,8 @@ public class JGlow {
      */
     public void addGlowToBlocks(List<Block> blocks, List<Player> viewers, ChatColor color) {
         for (Block block : blocks) {
-            if (block.getWorld() != null && isSolidBlockWithVisibleTexture(block)) {
+            if (block.getWorld() != null && isAllowedBlock(block)) {
                 addGlowToBlock(block, viewers, color);
-            } else {
-                for (Player viewer : viewers) {
-                    viewer.sendMessage("A block cannot glow because it is either not solid or has no visible texture.");
-                }
             }
         }
     }
@@ -260,7 +252,7 @@ public class JGlow {
     public void addGlowToBlock(Block block, Player receiver, ChatColor color, long duration) {
         try {
             // Check if the block is solid and has a visible texture
-            if (isSolidBlockWithVisibleTexture(block)) {
+            if (isAllowedBlock(block)) {
                 // Make the block glow for the player
                 glowingBlocks.setGlowing(block, receiver, color);
 
@@ -272,8 +264,6 @@ public class JGlow {
                         e.printStackTrace();
                     }
                 }, duration * 20);
-            } else {
-                receiver.sendMessage("This block cannot glow because it is either not solid or has no visible texture.");
             }
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
@@ -292,10 +282,8 @@ public class JGlow {
     public void addGlowToBlock(Block block, List<Player> viewers, ChatColor color, long duration) {
         for (Player viewer : viewers) {
             if (viewer.isOnline()) {
-                if (isSolidBlockWithVisibleTexture(block)) {
+                if (isAllowedBlock(block)) {
                     addGlowToBlock(block, viewer, color, duration);
-                } else {
-                    viewer.sendMessage("This block cannot glow because it is either not solid or has no visible texture.");
                 }
             }
         }
@@ -312,29 +300,22 @@ public class JGlow {
      */
     public void addGlowToBlocks(List<Block> blocks, List<Player> viewers, ChatColor color, long duration) {
         for (Block block : blocks) {
-            if (block.getWorld() != null && isSolidBlockWithVisibleTexture(block)) {
+            if (block.getWorld() != null && isAllowedBlock(block)) {
                 addGlowToBlock(block, viewers, color, duration);
-            } else {
-                for (Player viewer : viewers) {
-                    viewer.sendMessage("A block cannot glow because it is either not solid or has no visible texture.");
-                }
             }
         }
     }
 
     /**
-     * Checks if the block is solid and has a visible texture.
+     * Checks if the current block is allowed
      *
      * @param block The block to check
-     * @return true if the block is solid and has a visible texture
+     * @return true if the block is allowed
      */
-    private boolean isSolidBlockWithVisibleTexture(Block block) {
+    private boolean isAllowedBlock(Block block) {
         Material type = block.getType();
 
-        if (type.isSolid()) {
-            return type != Material.GLASS && type != Material.AIR && type != Material.WATER && type != Material.LAVA && type != Material.BARRIER;
-        }
-        return false;
+        return type.isSolid() && type.isOccluding() && !type.isAir();
     }
 
     /**
@@ -376,6 +357,173 @@ public class JGlow {
             if (block.getWorld() != null) {
                 removeGlowFromBlock(block, viewers);
             }
+        }
+    }
+
+    /**
+     * Makes the {@link Entity} passed as a parameter glow with the specified color
+     * for a specific player
+     *
+     * @param entity the entity to make glow
+     * @param receiver the player who will see the entity glowing
+     * @param color the color of the glowing effect
+     */
+    public void addGlowToEntity(Entity entity, Player receiver, ChatColor color) {
+        try {
+            glowingEntities.setGlowing(entity, receiver, color);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Makes the {@link Entity} glow for a list of players with the specified color
+     *
+     * @param entity the entity to make glow
+     * @param viewers the list of players who will see the entity glowing
+     * @param color the color of the glowing effect
+     */
+    public void addGlowToEntity(Entity entity, List<Player> viewers, ChatColor color) {
+        for (Player viewer : viewers) {
+            if (viewer.isOnline()) {
+                addGlowToEntity(entity, viewer, color);
+            }
+        }
+    }
+
+    /**
+     * Makes a list of entities glow for all players in a list with the specified color
+     *
+     * @param entities the list of entities to make glow
+     * @param viewers the list of players who will see the entities glowing
+     * @param color the color of the glowing effect
+     */
+    public void addGlowToEntities(List<Entity> entities, List<Player> viewers, ChatColor color) {
+        for (Entity entity : entities) {
+            addGlowToEntity(entity, viewers, color);
+        }
+    }
+
+    /**
+     * Makes the {@link Entity} passed as a parameter glow with the specified color
+     * for a specific player, and removes the glow after the specified duration
+     *
+     * @param entity the entity to make glow
+     * @param receiver the player who will see the entity glowing
+     * @param color the color of the glowing effect
+     * @param duration the duration (in seconds) for which the entity will glow
+     */
+    public void addGlowToEntity(Entity entity, Player receiver, ChatColor color, long duration) {
+        try {
+            glowingEntities.setGlowing(entity, receiver, color);
+
+            Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
+                try {
+                    glowingEntities.unsetGlowing(entity, receiver);
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                }
+            }, duration * 20);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Makes the {@link Entity} glow for a list of players with the specified color
+     * and removes the glow after the given duration
+     *
+     * @param entity the entity to make glow
+     * @param viewers the list of players who will see the entity glowing
+     * @param color the color of the glowing effect
+     * @param duration the duration (in seconds) for which the entity will glow
+     */
+    public void addGlowToEntity(Entity entity, List<Player> viewers, ChatColor color, long duration) {
+        for (Player viewer : viewers) {
+            if (viewer.isOnline()) {
+                addGlowToEntity(entity, viewer, color, duration);
+            }
+        }
+    }
+
+    /**
+     * Makes a list of entities glow for all players in a list with the specified color
+     * and removes the glow after the given duration
+     *
+     * @param entities the list of entities to make glow
+     * @param viewers the list of players who will see the entities glowing
+     * @param color the color of the glowing effect
+     * @param duration the duration (in seconds) for which the entities will glow
+     */
+    public void addGlowToEntities(List<Entity> entities, List<Player> viewers, ChatColor color, long duration) {
+        for (Entity entity : entities) {
+            addGlowToEntity(entity, viewers, color, duration);
+        }
+    }
+
+    /**
+     * Removes the glowing effect from the {@link Entity} for a specific player
+     *
+     * @param entity the entity to remove the glowing effect from
+     * @param receiver the player who will no longer see the glowing effect
+     */
+    public void removeGlowFromEntity(Entity entity, Player receiver) {
+        try {
+            glowingEntities.unsetGlowing(entity, receiver);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Removes the glowing effect from the {@link Entity} for a list of players
+     *
+     * @param entity the entity to remove the glowing effect from
+     * @param viewers the list of players who will no longer see the glowing effect
+     */
+    public void removeGlowFromEntity(Entity entity, List<Player> viewers) {
+        for (Player viewer : viewers) {
+            if (viewer.isOnline()) {
+                removeGlowFromEntity(entity, viewer);
+            }
+        }
+    }
+
+    /**
+     * Removes the glowing effect from an entity for all players
+     *
+     * @param entity the entity to remove the glowing effect from
+     */
+    public void removeGlowFromEntity(Entity entity) {
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            try {
+                glowingEntities.unsetGlowing(entity, viewer);
+            } catch (ReflectiveOperationException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Removes the glowing effect from a list of entities for a list of players
+     *
+     * @param entities the list of entities to remove the glowing effect from
+     * @param viewers the list of players who will no longer see the glowing effect
+     */
+    public void removeGlowFromEntities(List<Entity> entities, List<Player> viewers) {
+        for (Entity entity : entities) {
+            removeGlowFromEntity(entity, viewers);
+        }
+    }
+
+    /**
+     * Removes the glowing effect from a list of entities for all players
+     *
+     * @param entities the list of entities to remove the glowing effect from
+     */
+    public void removeGlowFromEntities(List<Entity> entities) {
+        for (Entity entity : entities) {
+            removeGlowFromEntity(entity);
         }
     }
 }
