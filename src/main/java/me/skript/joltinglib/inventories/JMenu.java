@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -92,6 +93,31 @@ public abstract class JMenu implements InventoryHolder {
 
         if (player.isOnline()) {
             player.openInventory(inventory);
+        }
+    }
+
+    /**
+     * Updates a specific item in the menu inventory dynamically, without resetting the entire inventory.
+     * This method modifies the item in the specified slot and refreshes the inventory view for all players
+     * currently viewing this menu
+     *
+     * @param slot        the slot index where the item should be updated
+     * @param item the new {@link ItemStack} to place in the specified slot. Can be null to clear the slot
+     * @throws IllegalStateException if the inventory has not been initialized before calling this method
+     */
+    public void updateItem(int slot, ItemStack item) {
+        if (inventory == null) {
+            throw new IllegalStateException("Inventory has not been initialized.");
+        }
+
+        inventory.setItem(slot, item);
+
+        for (Player viewer : inventory.getViewers()
+                .stream()
+                .filter(v -> v instanceof Player)
+                .map(v -> (Player) v)
+                .toList()) {
+            viewer.updateInventory();
         }
     }
 
