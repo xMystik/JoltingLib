@@ -1,5 +1,6 @@
 package me.skript.joltinglib.items;
 
+import me.skript.joltinglib.JVersion;
 import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.colorcodes.JText;
 import net.kyori.adventure.text.Component;
@@ -25,12 +26,22 @@ public class JItemBuilder {
     private final ItemMeta meta;
     private final boolean supportsComponents;
 
+    /**
+     * Creates a new {@code JItemBuilder} with the specified material
+     *
+     * @param material the {@link Material} of the item to build
+     */
     public JItemBuilder(Material material) {
         this.item = new ItemStack(material);
         this.meta = item.getItemMeta();
         this.supportsComponents = isComponentSupported();
     }
 
+    /**
+     * Checks if the server version supports Adventure {@link Component} for display names and lore
+     *
+     * @return true if components are supported, false otherwise
+     */
     private boolean isComponentSupported() {
         try {
             // Check if the ItemMeta class has available the displayName method to identify version
@@ -41,6 +52,12 @@ public class JItemBuilder {
         }
     }
 
+    /**
+     * Sets the display name of the item
+     *
+     * @param displayName the new display name, formatted with color codes
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setDisplayName(String displayName) {
         if(supportsComponents) {
             Component displayNameComponent = LegacyComponentSerializer
@@ -54,6 +71,12 @@ public class JItemBuilder {
         return this;
     }
 
+    /**
+     * Sets the lore of the item
+     *
+     * @param lore a list of lore lines, formatted with color codes
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setLore(List<String> lore) {
         if(supportsComponents) {
             List<Component> loreComponents = new ArrayList<>();
@@ -75,26 +98,44 @@ public class JItemBuilder {
         return this;
     }
 
+    /**
+     * Sets a single line of lore for the item
+     *
+     * @param lore the lore line, formatted with color codes (&)
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setLore(String lore) {
         return setLore(List.of(lore));
     }
 
-    public JItemBuilder addLore(String loreLine) {
+    /**
+     * Adds a line to the item's existing lore
+     *
+     * @param line the new lore line, formatted with color codes
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder addLore(String line) {
         if (supportsComponents) {
             List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
             lore.add(LegacyComponentSerializer
                     .legacyAmpersand()
-                    .deserialize(loreLine)
+                    .deserialize(line)
                     .decoration(TextDecoration.ITALIC, false));
             meta.lore(lore);
         } else {
             List<String> lore = meta.getLore() == null ? new ArrayList<>() : new ArrayList<>(meta.getLore());
-            lore.add(JText.format(loreLine));
+            lore.add(JText.format(line));
             meta.setLore(lore);
         }
         return this;
     }
 
+    /**
+     * Sets the owning player for a player skull
+     *
+     * @param playerName the name of the player to associate with the skull
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setPlayerSkull(String playerName) {
         if (meta instanceof SkullMeta skullMeta) {
 
@@ -106,16 +147,34 @@ public class JItemBuilder {
         return this;
     }
 
+    /**
+     * Sets the custom model data for the item
+     *
+     * @param customModelData the custom model data value
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setCustomModelData(int customModelData) {
         meta.setCustomModelData(customModelData);
         return this;
     }
 
+    /**
+     * Sets the amount of items in the stack
+     *
+     * @param amount the amount, limited between 1 and 64
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setAmount(int amount) {
         item.setAmount(Math.max(1, Math.min(amount, 64)));
         return this;
     }
 
+    /**
+     * Sets the item's durability
+     *
+     * @param durability the durability value
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setDurability(int durability) {
         if (meta instanceof Damageable damageable) {
             damageable.setDamage(Math.max(0, durability));
@@ -124,21 +183,48 @@ public class JItemBuilder {
         return this;
     }
 
+    /**
+     * Adds an enchantment to the item
+     *
+     * @param enchantment the {@link Enchantment} to add
+     * @param level       the level of the enchantment
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder addEnchant(Enchantment enchantment, int level) {
         meta.addEnchant(enchantment, level, true);
         return this;
     }
 
+    /**
+     * Adds item flags to the item
+     *
+     * @param flags the {@link ItemFlag}s to add
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder addItemFlags(ItemFlag... flags) {
         meta.addItemFlags(flags);
         return this;
     }
 
+    /**
+     * Sets whether the item is unbreakable
+     *
+     * @param unbreakable true to make the item unbreakable, false otherwise
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public JItemBuilder setUnbreakable(boolean unbreakable) {
         meta.setUnbreakable(unbreakable);
         return this;
     }
 
+    /**
+     * Adds custom data to the item using the Persistent Data API
+     *
+     * @param type the {@link PersistentDataType} of the data
+     * @param key the key for the data
+     * @param value the value to store
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
     public <K, V> JItemBuilder addData(PersistentDataType<K, V> type, String key, V value) {
         if (meta != null) {
             meta.getPersistentDataContainer().set(new NamespacedKey(JoltingLib.getInstance(), key), type, value);
@@ -147,6 +233,11 @@ public class JItemBuilder {
         return this;
     }
 
+    /**
+     * Builds the final {@link ItemStack} based on the current builder state
+     *
+     * @return the constructed {@link ItemStack}
+     */
     public ItemStack build() {
         item.setItemMeta(meta);
         return item;
