@@ -1,7 +1,8 @@
-package me.skript.joltinglib;
+package me.skript.joltinglib.glow;
 
 import fr.skytasul.glowingentities.GlowingBlocks;
 import fr.skytasul.glowingentities.GlowingEntities;
+import me.skript.joltinglib.JoltingLib;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
