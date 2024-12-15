@@ -1,131 +1,96 @@
 package me.skript.joltinglib.configurations;
 
-import org.bukkit.Bukkit;
+import me.skript.joltinglib.JoltingLib;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class JConfigFile<P extends Plugin> {
 
     private final P plugin;
     private final File file;
-    private FileConfiguration config;
+    private final FileConfiguration config;
     private final String fileAsName;
     private final String folderPath;
 
-    //----------------------------[ ConfigFiles Constructors Start ]----------------------------//
-    //Used to create a config file on the default plugins path.
-    public JConfigFile(P plugin, String fileName) {
-        this.plugin = plugin;
-        file = new File(plugin.getDataFolder(), fileName + ".yml");
-        fileAsName = fileName;
-        folderPath = "default/" + fileName + ".yml";
-        setupConfig();
-        config = new YamlConfiguration();
-        reloadConfig();
+    protected JConfigFile(P plugin, String fileName) {
+        this(plugin, fileName, "");
     }
 
-    //Used to create a config file on the specified path.
-    public JConfigFile(P plugin, String fileName, String folderPathName) {
+    protected JConfigFile(P plugin, String fileName, String folderPathName) {
         this.plugin = plugin;
-        file = new File(plugin.getDataFolder() + "/" + folderPathName, fileName + ".yml");
-        fileAsName = fileName;
-        folderPath = folderPathName + "/" + fileName + ".yml";
+        this.fileAsName = fileName;
+        this.folderPath = folderPathName.isEmpty() ? fileName + ".yml" : folderPathName + "/" + fileName + ".yml";
+        this.file = folderPathName.isEmpty() ?
+                new File(plugin.getDataFolder(), fileName + ".yml") :
+                new File(plugin.getDataFolder() + "/" + folderPathName, fileName + ".yml");
         setupConfig();
-        config = new YamlConfiguration();
-        reloadConfig();
+        this.config = YamlConfiguration.loadConfiguration(file);
     }
 
-    //Used to create a config file on the specified path(s).
-    public JConfigFile(P plugin, String fileName, String... folderPathName) {
-        this.plugin = plugin;
-        String path = "default";
-        for(String s : folderPathName) {
-            path += "/" + s;
-        }
-        file = new File(plugin.getDataFolder() + "/" + path, fileName + ".yml");
-        fileAsName = fileName;
-        folderPath = path + "/" + fileName + ".yml";
-        setupConfig();
-        config = new YamlConfiguration();
-        reloadConfig();
-    }
-    //-----------------------------[ ConfigFiles Constructors End ]-----------------------------//
-
-    //------------------------------[ ConfigFiles Methods Start ]-------------------------------//
-    //Used to return the configuration the file.
     public FileConfiguration getConfig() {
         return config;
     }
 
-    //Used to return the file.
     public File getConfigFile() {
         return file;
     }
 
-    //Used to return the file name.
     public String getFileAsName() {
         return fileAsName;
     }
 
-    //Used to return the file name. (Including the .yml)
-    public String getFileName() { return file.getName(); }
+    public String getFileName() {
+        return file.getName();
+    }
 
-    //Used to return the folder path.
-    public String getFolderPath() { return folderPath; }
+    public String getFolderPath() {
+        return folderPath;
+    }
 
-    //Used to save the configuration file.
     public void saveConfig() {
         try {
             config.save(file);
         } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage( fileAsName + " file saving has been cancelled. [IOException]");
+            JoltingLib.getInstance().getLogger().severe("Failed to save " + fileAsName + " file. Error: " + e.getMessage());
         }
     }
 
-    //Used to load file contents into the file configuration.
     public void reloadConfig() {
         try {
             config.load(file);
         } catch (Exception e) {
-            Bukkit.getConsoleSender().sendMessage(fileAsName + " file reloading has been cancelled. [Exception]");
+            JoltingLib.getInstance().getLogger().severe("Failed to reload " + fileAsName + " file. Error: " + e.getMessage());
         }
     }
 
-    public void copyDefaults(InputStream inputFile, File outputFile) {
-        try (OutputStream output = Files.newOutputStream(outputFile.toPath())) {
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputFile.read(buffer)) > 0) {
-                output.write(buffer, 0, length);
-            }
-        } catch (Exception e) {
-            Bukkit.getConsoleSender().sendMessage("Copy defaults has been cancelled for " + outputFile.getName() + " [Exception: " + e.getMessage() + "]");
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inputFile != null) inputFile.close();
-            } catch (IOException e) {
-                Bukkit.getConsoleSender().sendMessage("Failed to close input stream. [Exception: " + e.getMessage() + "]");
-            }
+    protected void copyDefaults(InputStream inputFile) {
+        try {
+            Files.copy(inputFile, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            JoltingLib.getInstance().getLogger().severe("Failed to copy default file for " + fileAsName + ". Error: " + e.getMessage());
         }
     }
 
     private void setupConfig() {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-
-            InputStream inputStream = plugin.getResource(fileAsName + ".yml");
-            if (inputStream != null) {
-                copyDefaults(inputStream, file);
+            InputStream defaultFile = plugin.getResource(fileAsName + ".yml");
+            if (defaultFile != null) {
+                copyDefaults(defaultFile);
             } else {
-                Bukkit.getConsoleSender().sendMessage("File for " + fileAsName + ".yml not found in the jar.");
+                try {
+                    if (file.createNewFile()) {
+                        JoltingLib.getInstance().getLogger().info("Created empty configuration file: " + fileAsName + ".yml");
+                    }
+                } catch (IOException e) {
+                    JoltingLib.getInstance().getLogger().severe("Failed to create empty file for " + fileAsName + ". Error: " + e.getMessage());
+                }
             }
         }
-        config = YamlConfiguration.loadConfiguration(file);
     }
-    //-------------------------------[ ConfigFiles Methods End ]--------------------------------//
 }
