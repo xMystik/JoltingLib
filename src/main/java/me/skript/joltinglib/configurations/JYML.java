@@ -12,11 +12,11 @@ import java.util.logging.Level;
 
 public class JYML<P extends Plugin> {
 
-    private final P plugin;
-    private final File file;
-    private final FileConfiguration config;
+    protected final P plugin;
+    protected final File file;
+    protected final FileConfiguration config;
 
-    public JYML(P plugin, String fileName, String... folderPath) {
+    protected JYML(P plugin, String fileName, String... folderPath) {
         this.plugin = plugin;
         String folder = String.join("/", folderPath);
         this.file = folder.isEmpty() ? new File(plugin.getDataFolder(), fileName + ".yml")
@@ -49,7 +49,7 @@ public class JYML<P extends Plugin> {
         }
     }
 
-    private void setupFile(String fileName) {
+    protected void setupFile(String fileName) {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             InputStream defaultFile = plugin.getResource(fileName + ".yml");
