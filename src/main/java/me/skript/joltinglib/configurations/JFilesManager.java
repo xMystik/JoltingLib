@@ -1,86 +1,141 @@
 package me.skript.joltinglib.configurations;
 
-import me.skript.joltinglib.JDebug;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
 
 public class JFilesManager<P extends Plugin> {
 
     private final P plugin;
-    private final Map<String, JConfigFile<P>> filesMap = new HashMap<>();
+    private final Map<String, Object> filesMap = new HashMap<>();
 
     public JFilesManager(P plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Creates a folder with the specified name and path
+     *
+     * @param folderName the name of the folder to create
+     * @param folderPath the optional path where the folder should be created
+     */
     public void createFolder(String folderName, String... folderPath) {
-        StringBuilder path = new StringBuilder();
+        String folder = String.join("/", folderPath);
+        File directory = folder.isEmpty() ? new File(plugin.getDataFolder(), folderName)
+                : new File(plugin.getDataFolder() + "/" + folder, folderName);
 
-        for (String s : folderPath) {
-            path.append("/").append(s);
-        }
-        File folder = new File(plugin.getDataFolder() + "" + path, folderName);
-        if (!folder.exists()) {
-            folder.mkdirs();
+        if (!directory.exists()) {
+            directory.mkdirs();
         }
     }
 
+    /**
+     * Creates a folder in the root of the plugin's data folder
+     *
+     * @param folderName the name of the folder to create
+     */
     public void createFolder(String folderName) {
         createFolder(folderName, "");
     }
 
-    public JConfigFile<P> createFile(String fileName, String folderName) {
-        String key = folderName.isEmpty() ? fileName + ".yml" : folderName + "/" + fileName + ".yml";
-        return filesMap.computeIfAbsent(key, k -> new JConfigFile<>(plugin, fileName, folderName));
+    /**
+     * Deletes a folder and all its contents
+     *
+     * @param folderName the name of the folder to delete
+     * @param folderPath the optional path to the folder
+     * @return true if the folder was successfully deleted, false otherwise
+     */
+    public boolean deleteFolder(String folderName, String... folderPath) {
+        String folder = String.join("/", folderPath);
+        File directory = folder.isEmpty() ? new File(plugin.getDataFolder(), folderName)
+                : new File(plugin.getDataFolder() + "/" + folder, folderName);
+
+        return deleteFolderRecursive(directory);
     }
 
-    public JConfigFile<P> createFile(String fileName) {
-        String key = fileName + ".yml";
-        return filesMap.computeIfAbsent(key, k -> new JConfigFile<>(plugin, fileName));
+    /**
+     * Recursively deletes a folder and its contents
+     *
+     * @param directory the folder to delete
+     * @return true if deletion was successful, false otherwise
+     */
+    private boolean deleteFolderRecursive(File directory) {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteFolderRecursive(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+            return directory.delete();
+        }
+        return false;
     }
 
-    public void deleteFile(JConfigFile<P> configFile) {
-        if (configFile.getFile().exists() && configFile.getFile().delete()) {
-            filesMap.remove(configFile.getFolderPath());
-        } else {
-            JDebug.log(Level.WARNING, "Failed to delete configuration file: " + configFile.getFileName());
+    /**
+     * Creates or retrieves a YAML configuration file
+     *
+     * @param fileName the name of the file (without extension)
+     * @param folderPath the optional path for the file
+     * @return the JYML instance
+     */
+    public JYML<P> createYML(String fileName, String... folderPath) {
+        String key = String.join("/", folderPath) + "/" + fileName + ".yml";
+        return (JYML<P>) filesMap.computeIfAbsent(key, k -> new JYML<>(plugin, fileName, folderPath));
+    }
+
+    /**
+     * Deletes a file (YAML or JSON) by its key
+     *
+     * @param key the key (path) of the file to delete
+     */
+    public void deleteFile(String key) {
+        Object file = filesMap.remove(key);
+        if (file instanceof JYML) {
+            ((JYML<?>) file).getFile().delete();
         }
     }
 
-    public JConfigFile<P> getFile(String filePath) {
-        return filesMap.get(filePath);
+    /**
+     * Retrieves a file (actual File object) by its key
+     *
+     * @param key the key (path) of the file
+     * @return the File object, or null if not found
+     */
+    public File getFile(String key) {
+        Object fileObject = filesMap.get(key);
+        if (fileObject instanceof JYML) {
+            return ((JYML<?>) fileObject).getFile();
+        }
+        return null;
     }
 
-    public Map<String, JConfigFile<P>> getAllRegisteredConfigs() {
+    /**
+     * Retrieves all registered files
+     *
+     * @return a map of all registered files with their keys
+     */
+    public Map<String, Object> getAllRegisteredFiles() {
         return new HashMap<>(filesMap);
     }
 
-    public Map<String, JConfigFile<P>> getAllConfigsInFolder(String folderPath) {
-        Map<String, JConfigFile<P>> filteredMap = new HashMap<>();
-
-        filesMap.forEach((key, value) -> {
-            if (key.startsWith(folderPath)) {
-                filteredMap.put(key, value);
-            }
-        });
-        return filteredMap;
-    }
-
-    public Map<String, JConfigFile<P>> discoverConfigs(String folderPath) {
-        Map<String, JConfigFile<P>> discoveredConfigs = new HashMap<>();
-        File folder = new File(plugin.getDataFolder(), folderPath);
-
-        if (folder.exists() && folder.isDirectory()) {
-            for (File file : folder.listFiles()) {
-                if (!file.isDirectory() && file.getName().endsWith(".yml")) {
-                    String fileName = file.getName().replace(".yml", "");
-                    discoveredConfigs.put(folderPath + "/" + file.getName(), createFile(fileName, folderPath));
-                }
+    /**
+     * Retrieves all registered YML files
+     *
+     * @return a map of all registered YML files with their keys
+     */
+    public Map<String, JYML<P>> getAllYMLConfigs() {
+        Map<String, JYML<P>> yamlFiles = new HashMap<>();
+        for (Map.Entry<String, Object> entry : filesMap.entrySet()) {
+            if (entry.getValue() instanceof JYML) {
+                yamlFiles.put(entry.getKey(), (JYML<P>) entry.getValue());
             }
         }
-        return discoveredConfigs;
+        return yamlFiles;
     }
 }
