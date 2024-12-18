@@ -1,9 +1,11 @@
 package me.skript.joltinglib.configurations;
 
+import me.skript.joltinglib.JDebug;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
 
 public class JFilesManager<P extends Plugin> {
 
@@ -16,6 +18,7 @@ public class JFilesManager<P extends Plugin> {
 
     public void createFolder(String folderName, String... folderPath) {
         StringBuilder path = new StringBuilder();
+
         for (String s : folderPath) {
             path.append("/").append(s);
         }
@@ -40,10 +43,10 @@ public class JFilesManager<P extends Plugin> {
     }
 
     public void deleteFile(JConfigFile<P> configFile) {
-        if (configFile.getConfigFile().exists() && configFile.getConfigFile().delete()) {
+        if (configFile.getFile().exists() && configFile.getFile().delete()) {
             filesMap.remove(configFile.getFolderPath());
         } else {
-            plugin.getLogger().warning("Failed to delete configuration file: " + configFile.getFileName());
+            JDebug.log(Level.WARNING, "Failed to delete configuration file: " + configFile.getFileName());
         }
     }
 
@@ -57,6 +60,7 @@ public class JFilesManager<P extends Plugin> {
 
     public Map<String, JConfigFile<P>> getAllConfigsInFolder(String folderPath) {
         Map<String, JConfigFile<P>> filteredMap = new HashMap<>();
+
         filesMap.forEach((key, value) -> {
             if (key.startsWith(folderPath)) {
                 filteredMap.put(key, value);
@@ -68,6 +72,7 @@ public class JFilesManager<P extends Plugin> {
     public Map<String, JConfigFile<P>> discoverConfigs(String folderPath) {
         Map<String, JConfigFile<P>> discoveredConfigs = new HashMap<>();
         File folder = new File(plugin.getDataFolder(), folderPath);
+
         if (folder.exists() && folder.isDirectory()) {
             for (File file : folder.listFiles()) {
                 if (!file.isDirectory() && file.getName().endsWith(".yml")) {
