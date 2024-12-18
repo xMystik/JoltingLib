@@ -16,6 +16,13 @@ public class JYML<P extends Plugin> {
     protected final File file;
     protected final FileConfiguration config;
 
+    /**
+     * Constructs a new JYML instance
+     *
+     * @param plugin the plugin instance using this YAML file
+     * @param fileName the name of the YAML file (without extension)
+     * @param folderPath the folder path relative to the plugin's data folder
+     */
     protected JYML(P plugin, String fileName, String... folderPath) {
         this.plugin = plugin;
         String folder = String.join("/", folderPath);
@@ -25,14 +32,27 @@ public class JYML<P extends Plugin> {
         this.config = YamlConfiguration.loadConfiguration(file);
     }
 
+    /**
+     * Retrieves the configuration object for this YAML file
+     *
+     * @return the FileConfiguration object
+     */
     public FileConfiguration getConfig() {
         return config;
     }
 
+    /**
+     * Retrieves the file object for this YAML file
+     *
+     * @return the File object representing the YAML file
+     */
     public File getFile() {
         return file;
     }
 
+    /**
+     * Saves changes made to the configuration back to the YAML file
+     */
     public void saveConfig() {
         try {
             config.save(file);
@@ -41,6 +61,9 @@ public class JYML<P extends Plugin> {
         }
     }
 
+    /**
+     * Reloads the YAML file from disk, updating the configuration object
+     */
     public void reloadConfig() {
         try {
             config.load(file);
@@ -49,6 +72,11 @@ public class JYML<P extends Plugin> {
         }
     }
 
+    /**
+     * Sets up the YAML file by ensuring its existence
+     *
+     * @param fileName the name of the YAML file
+     */
     protected void setupFile(String fileName) {
         if (!file.exists()) {
             file.getParentFile().mkdirs();

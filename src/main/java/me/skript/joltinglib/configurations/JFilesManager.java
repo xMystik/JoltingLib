@@ -8,10 +8,16 @@ import java.util.*;
 public class JFilesManager<P extends Plugin> {
 
     private final P plugin;
-    private final Map<String, Object> filesMap = new HashMap<>();
+    private final Map<String, Object> filesMap;
 
+    /**
+     * Constructs a new instance of JFilesManager
+     *
+     * @param plugin the plugin instance using this file manager.
+     */
     public JFilesManager(P plugin) {
         this.plugin = plugin;
+        this.filesMap = new HashMap<>();
     }
 
     /**
