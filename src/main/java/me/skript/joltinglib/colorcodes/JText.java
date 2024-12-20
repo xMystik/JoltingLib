@@ -1,75 +1,150 @@
 package me.skript.joltinglib.colorcodes;
 
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JText {
 
+    private static final MiniMessage miniMessage = MiniMessage.miniMessage();
+
     /**
-     * Formats a string by converting custom hex color codes and alternate color codes
-     * into valid Minecraft color codes.
-     *
-     * <p>Identifies hex color codes in the format {@code &#RRGGBB}, converts them
-     * into Bukkit-supported color codes using the {@code &x&r&r&g&g&b&b} format, and processes
-     * all color codes into valid {@link ChatColor}</p>
+     * Formats a string by converting custom hex color codes and alternate color codes into valid Minecraft color codes using MiniMessage
      *
      * @param message the string to format, which may include custom hex and alternate color codes
-     * @return the formatted string with valid Minecraft color codes
+     * @return the formatted string with valid color codes as a Component
      */
-    public static String format(String message) {
-        Pattern pattern = Pattern.compile("(&#[a-fA-F0-9]{6})");
-        Matcher matcher = pattern.matcher(message);
-
-        while (matcher.find()) {
-            // Entire matched pattern including &#
-            String colorCode = matcher.group(1);
-            // Extract just the hex code, excluding &#
-            String hexCode = colorCode.substring(2);
-            StringBuilder hexBuilder = new StringBuilder("&x");
-            for (char c : hexCode.toCharArray()) {
-                hexBuilder.append("&").append(c);
-            }
-            // Replace the entire matched pattern
-            message = message.replace(colorCode, hexBuilder.toString());
+    public static Component format(String message) {
+        if (message == null || message.isEmpty()) {
+            return Component.empty();
         }
 
-        return ChatColor.translateAlternateColorCodes('&', message);
+        return miniMessage.deserialize(message);
     }
 
     /**
-     * Sends a centered message to a player by calculating pixel width and adjusting the spacing.
+     * Creates a styled button as a Component with hover and click functionality
+     *
+     * <p>This method allows for the creation of interactive buttons within chat messages.
+     * The button text is formatted using MiniMessage for color codes and styling,
+     * while hover and click events provide interactivity</p>
+     *
+     * @param buttonText the text to display on the button
+     * @param hoverText the text to display when the button is hovered over
+     * @param clickAction the action to perform when the button is clicked
+     * @param clickValue the value associated with the click action
+     * @return a Component representing the interactive button
+     */
+    public static Component createButton(String buttonText, String hoverText, ClickEvent.Action clickAction, String clickValue) {
+        Component formattedButtonText = miniMessage.deserialize(buttonText);
+        Component formattedHoverText = miniMessage.deserialize(hoverText);
+
+        // Create the button component with formatted text, hover event, and click event
+        return Component.text()
+                .append(formattedButtonText)
+                .hoverEvent(HoverEvent.showText(formattedHoverText))
+                .clickEvent(ClickEvent.clickEvent(clickAction, clickValue))
+                .build();
+    }
+
+    /**
+     * Creates a styled button as a Component with click functionality
+     *
+     * <p>This method allows for the creation of interactive buttons within chat messages.
+     * The button text is formatted using MiniMessage for color codes and styling,
+     * while click events provide interactivity</p>
+     *
+     * @param buttonText the text to display on the button
+     * @param clickAction the action to perform when the button is clicked
+     * @param clickValue the value associated with the click action
+     * @return a Component representing the interactive button
+     */
+    public static Component createButton(String buttonText, ClickEvent.Action clickAction, String clickValue) {
+        Component formattedButtonText = miniMessage.deserialize(buttonText);
+
+        // Create the button component with formatted text and click event
+        return Component.text()
+                .append(formattedButtonText)
+                .clickEvent(ClickEvent.clickEvent(clickAction, clickValue))
+                .build();
+    }
+
+    /**
+     * Sends a message with placeholders replaced by specified Components to a player.
+     *
+     * <p>The placeholders are identified by curly braces, such as "{0}", "{1}", etc.,
+     * and are replaced sequentially with the provided Components in the buttons array.</p>
+     *
+     * @param player the player that'll receive the message
+     * @param message the message containing placeholders
+     * @param buttons  the Components to replace the placeholders in order
+     */
+    public static void sendMessage(Player player, String message, Component... buttons) {
+        if (message == null || message.isEmpty()) {
+            player.sendMessage(Component.empty());
+            return;
+        }
+
+        // Splits by placeholders like {0}, {1}, etc.
+        String[] parts = message.split("\\{\\d+}");
+        Component result = Component.empty();
+
+        int buttonIndex = 0;
+
+        // Loop through the parts of the message
+        for (String part : parts) {
+            // Append the text part
+            result = result.append(format(part));
+
+            // Append the button Component only if there's a corresponding placeholder
+            if (buttonIndex < buttons.length && message.contains("{" + buttonIndex + "}")) {
+                result = result.append(buttons[buttonIndex++]);
+            }
+        }
+
+        // If there are leftover buttons but no corresponding placeholders, they shouldn't be appended
+        player.sendMessage(result);
+    }
+
+    /**
+     * Sends a centered message to a player by calculating pixel width and adjusting the spacing
      *
      * <p>This method measures the pixel width of the input message using a custom font info class
-     * ({@link JFontInfo}) to account for character sizes and bold text. It then prepends spaces
-     * to the message until it is visually centered in the Minecraft chat window (154 pixels wide).</p>
-     *
-     * <p>The method also formats the message using {@link #format(String)} before sending it.</p>
+     * ({@link JFontInfo}) to account for character sizes and bold text. It uses {@link MiniMessage}
+     * for color codes and formatting</p>
      *
      * @param player the player to whom the centered message will be sent
      * @param message the message to center and send; if null or empty, sends an empty line
      */
-    public static void centerMessage(Player player, String message){
-        if(message == null || message.equals("")) player.sendMessage("");
-        message = format(message);
+    public static void sendCenteredMessage(Player player, String message) {
+        if (message == null || message.isEmpty()) {
+            player.sendMessage("");
+            return;
+        }
+
+        Component formattedComponent = format(message);
+        String plainMessage = LegacyComponentSerializer.legacySection().serialize(formattedComponent);
 
         int messagePxSize = 0;
         boolean previousCode = false;
         boolean isBold = false;
 
-        for(char c : message.toCharArray()){
-            if(c == '§'){
+        for (char c : plainMessage.toCharArray()) {
+            if (c == '§') {
                 previousCode = true;
                 continue;
-            }else if(previousCode == true){
+            } else if (previousCode) {
                 previousCode = false;
-                if(c == 'l' || c == 'L'){
+                if (c == 'l' || c == 'L') {
                     isBold = true;
                     continue;
-                }else isBold = false;
-            }else{
+                } else {
+                    isBold = false;
+                }
+            } else {
                 JFontInfo dFI = JFontInfo.getDefaultFontInfo(c);
                 messagePxSize += isBold ? dFI.getBoldLength() : dFI.getLength();
                 messagePxSize++;
@@ -81,12 +156,93 @@ public class JText {
         int spaceLength = JFontInfo.SPACE.getLength() + 1;
         int compensated = 0;
         StringBuilder sb = new StringBuilder();
-        while(compensated < toCompensate){
+
+        while (compensated < toCompensate) {
             sb.append(" ");
             compensated += spaceLength;
         }
 
-        player.sendMessage(sb + message);
+        player.sendMessage(sb + plainMessage);
+    }
+
+    /**
+     * Sends a centered message to a player by calculating pixel width and adjusting the spacing
+     *
+     * <p>This method measures the pixel width of the input message using a custom font info class
+     * ({@link JFontInfo}) to account for character sizes and bold text. It uses {@link MiniMessage}
+     * for color codes and formatting. The method also supports inserting buttons as placeholders
+     * within the message, which are inserted at the corresponding positions in the message's layout</p>
+     *
+     * @param player the player to whom the centered message will be sent
+     * @param message the message to center and send, which may contain placeholders such as "{0}", "{1}"
+     * @param buttons the Components to replace the placeholders in the message, in order
+     */
+    public static void sendCenteredMessage(Player player, String message, Component... buttons) {
+        if (message == null || message.isEmpty()) {
+            player.sendMessage("");
+            return;
+        }
+
+        // Split the message by placeholders like {0}, {1}, etc.
+        String[] parts = message.split("\\{\\d+}");
+        Component result = Component.empty();
+
+        int buttonIndex = 0;
+
+        // Loop through the parts of the message
+        for (String part : parts) {
+            // Append the text part
+            result = result.append(format(part));
+
+            // Append the replacement Component (button) only if there's a corresponding placeholder
+            if (buttonIndex < buttons.length && message.contains("{" + buttonIndex + "}")) {
+                result = result.append(buttons[buttonIndex++]);
+            }
+        }
+
+        // Calculate the message width excluding buttons
+        String plainMessage = LegacyComponentSerializer.legacySection().serialize(result);
+
+        int messagePxSize = 0;
+        boolean previousCode = false;
+        boolean isBold = false;
+
+        // Calculate pixel width of the formatted message without components (buttons)
+        for (char c : plainMessage.toCharArray()) {
+            if (c == '§') {
+                previousCode = true;
+                continue;
+            } else if (previousCode) {
+                previousCode = false;
+                if (c == 'l' || c == 'L') {
+                    isBold = true;
+                    continue;
+                } else {
+                    isBold = false;
+                }
+            } else {
+                JFontInfo dFI = JFontInfo.getDefaultFontInfo(c);
+                messagePxSize += isBold ? dFI.getBoldLength() : dFI.getLength();
+                messagePxSize++;
+            }
+        }
+
+        int halvedMessageSize = messagePxSize / 2;
+        int toCompensate = 154 - halvedMessageSize;
+        int spaceLength = JFontInfo.SPACE.getLength() + 1;
+        int compensated = 0;
+        StringBuilder sb = new StringBuilder();
+
+        while (compensated < toCompensate) {
+            sb.append(" ");
+            compensated += spaceLength;
+        }
+
+        // Create a Component with the centered text (spaces + the original message with buttons)
+        Component centeredMessage = Component.text(sb.toString()).append(result);
+
+        // Send the centered message with buttons
+        player.sendMessage(centeredMessage);
     }
 
 }

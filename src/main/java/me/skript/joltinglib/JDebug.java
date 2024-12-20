@@ -70,5 +70,4 @@ public class JDebug {
             return false;
         }
     }
-
 }
