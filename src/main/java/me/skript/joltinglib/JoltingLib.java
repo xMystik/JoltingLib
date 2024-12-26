@@ -4,7 +4,10 @@ import me.skript.joltinglib.colorcodes.JText;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 public final class JoltingLib extends JavaPlugin {
 
@@ -20,14 +23,14 @@ public final class JoltingLib extends JavaPlugin {
 
         this.configurationFile = filesManager.createYML("configuration");
 
-        JText.format("&3&l[JoltingLib] &7Libraries have been enabled!");
+        this.getLogger().log(Level.INFO, "[JoltingLib] Library has been enabled!");
     }
 
     @Override
     public void onDisable() {
         glowManager.disable();
 
-        JText.format("&3&l[JoltingLib] &7Libraries have been disabled!");
+        this.getLogger().log(Level.INFO, "[JoltingLib] Library has been disabled!");
     }
 
     public static JoltingLib getInstance() {
