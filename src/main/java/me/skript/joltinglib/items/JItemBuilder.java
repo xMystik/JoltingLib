@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -19,6 +20,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class JItemBuilder {
 
@@ -123,14 +125,14 @@ public class JItemBuilder {
     /**
      * Sets the owning player for a player skull
      *
-     * @param playerName the name of the player to associate with the skull
+     * @param playerUUID the UUID of the player to associate with the skull
      * @return the current {@code JItemBuilder} instance for chaining
      */
-    public JItemBuilder setPlayerSkull(String playerName) {
+    public JItemBuilder setPlayerSkull(UUID playerUUID) {
         if (meta instanceof SkullMeta skullMeta) {
 
             // Set the owning player of the skull
-            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
+            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerUUID));
 
             item.setItemMeta(skullMeta);
         }

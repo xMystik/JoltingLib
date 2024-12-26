@@ -1,0 +1,8 @@
+#########################################################
+#               Main Configuration File                 #
+#                                                       #
+#                    Author: Skript                     #
+#########################################################
+
+# set true to enable debugging
+debug-enabled: true

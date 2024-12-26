@@ -94,9 +94,7 @@ public class JText {
 
         int buttonIndex = 0;
 
-        // Loop through the parts of the message
         for (String part : parts) {
-            // Append the text part
             result = result.append(format(part));
 
             // Append the button Component only if there's a corresponding placeholder
@@ -189,9 +187,7 @@ public class JText {
 
         int buttonIndex = 0;
 
-        // Loop through the parts of the message
         for (String part : parts) {
-            // Append the text part
             result = result.append(format(part));
 
             // Append the replacement Component (button) only if there's a corresponding placeholder
@@ -200,14 +196,12 @@ public class JText {
             }
         }
 
-        // Calculate the message width excluding buttons
         String plainMessage = LegacyComponentSerializer.legacySection().serialize(result);
 
         int messagePxSize = 0;
         boolean previousCode = false;
         boolean isBold = false;
 
-        // Calculate pixel width of the formatted message without components (buttons)
         for (char c : plainMessage.toCharArray()) {
             if (c == '§') {
                 previousCode = true;
@@ -240,8 +234,6 @@ public class JText {
 
         // Create a Component with the centered text (spaces + the original message with buttons)
         Component centeredMessage = Component.text(sb.toString()).append(result);
-
-        // Send the centered message with buttons
         player.sendMessage(centeredMessage);
     }
 

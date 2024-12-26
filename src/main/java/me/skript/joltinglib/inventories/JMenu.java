@@ -1,5 +1,7 @@
 package me.skript.joltinglib.inventories;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,7 +16,7 @@ public abstract class JMenu implements InventoryHolder {
 
     protected UUID owner;
     protected Inventory inventory;
-    protected String title;
+    protected Component title;
     protected int size;
 
     /**
@@ -39,7 +41,7 @@ public abstract class JMenu implements InventoryHolder {
      *
      * @return the title of the inventory
      */
-    public abstract String getTitle();
+    public abstract Component getTitle();
 
     /**
      * Sets up the contents of the menu. This method must be implemented
@@ -64,7 +66,7 @@ public abstract class JMenu implements InventoryHolder {
      */
     public void openMenu() {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = getTitle() != null ? getTitle() : "Undefined";
+        this.title = getTitle() != null ? getTitle() : MiniMessage.miniMessage().deserialize("Undefined");
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
         setupContents();
@@ -86,7 +88,7 @@ public abstract class JMenu implements InventoryHolder {
      */
     public void openMenu(Player player) {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = getTitle() != null ? getTitle() : "Undefined";
+        this.title = getTitle() != null ? getTitle() : MiniMessage.miniMessage().deserialize("Undefined");
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
         setupContents();

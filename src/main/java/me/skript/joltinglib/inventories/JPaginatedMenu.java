@@ -1,6 +1,7 @@
 package me.skript.joltinglib.inventories;
 
 import me.skript.joltinglib.items.JItemBuilder;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,8 +12,6 @@ import java.util.List;
 public abstract class JPaginatedMenu extends JMenu {
 
     protected int currentPage;
-    protected int nextPageSlot;
-    protected int previousPageSlot;
 
     /**
      * Creates a new paginated menu for the specified player
@@ -69,11 +68,12 @@ public abstract class JPaginatedMenu extends JMenu {
     public abstract List<ItemStack> getItemsToPaginate();
 
     /**
-     * Retrieves the filler item used to fill empty slots in the menu
+     * Retrieves the list of slots that can be used for pagination
+     * If null or empty, all empty slots will be used
      *
-     * @return the filler item, or null if no filler item is used
+     * @return the list of slots for pagination, or null to use all empty slots
      */
-    public abstract ItemStack getFillerItem();
+    public abstract List<Integer> getPaginationSlots();
 
     /**
      * Sets up the layout of the menu, such as configuring item placements
@@ -90,7 +90,7 @@ public abstract class JPaginatedMenu extends JMenu {
     @Override
     public void openMenu(Player player) {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = getTitle() != null ? getTitle() : "Undefined";
+        this.title = getTitle() != null ? getTitle() : MiniMessage.miniMessage().deserialize("Undefined");
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
 
@@ -109,19 +109,32 @@ public abstract class JPaginatedMenu extends JMenu {
      */
     public void setupContents() {
         inventory.clear();
-
         setupLayout();
 
         if (getItemsToPaginate() == null) {
             return;
         }
 
+        List<Integer> paginationSlots = getPaginationSlots();
+        boolean useAllEmptySlots = (paginationSlots == null || paginationSlots.isEmpty());
+
         int start = currentPage * getItemsPerPage();
         int end = Math.min(start + getItemsPerPage(), getItemsToPaginate().size());
 
-        for (int i = start; i < end; i++) {
-            ItemStack item = getItemsToPaginate().get(i);
-            inventory.addItem(item);
+        List<ItemStack> itemsToPaginate = getItemsToPaginate().subList(start, end);
+
+        if (useAllEmptySlots) {
+            for (int i = 0; i < inventory.getSize(); i++) {
+                if (inventory.getItem(i) == null && !itemsToPaginate.isEmpty()) {
+                    inventory.setItem(i, itemsToPaginate.remove(0));
+                }
+            }
+        } else {
+            for (int slot : paginationSlots) {
+                if (slot >= 0 && slot < inventory.getSize() && !itemsToPaginate.isEmpty()) {
+                    inventory.setItem(slot, itemsToPaginate.remove(0));
+                }
+            }
         }
 
         updateNavigationItems();
@@ -130,12 +143,9 @@ public abstract class JPaginatedMenu extends JMenu {
     /**
      * Updates the previous and next page items based on the current page.
      * If a previous or next page exists, the corresponding item is placed in
-     * the inventory. Otherwise, a filler item is placed (if provided)
+     * the inventory.
      */
     protected void updateNavigationItems() {
-        inventory.setItem(inventory.getSize() - 9, null); // Previous page
-        inventory.setItem(inventory.getSize() - 1, null); // Next page
-
         int nextPageSlot = getNextPageSlot();
         int previousPageSlot = getPreviousPageSlot();
 
@@ -148,10 +158,7 @@ public abstract class JPaginatedMenu extends JMenu {
             }
             inventory.setItem(previousPageSlot, previousPageItem);
         } else {
-            ItemStack fillerItem = getFillerItem();
-            if (fillerItem != null) {
-                inventory.setItem(previousPageSlot, fillerItem);
-            }
+            inventory.setItem(previousPageSlot, null);
         }
 
         int maxPage = calculateMaxPage();
@@ -164,10 +171,7 @@ public abstract class JPaginatedMenu extends JMenu {
             }
             inventory.setItem(nextPageSlot, nextPageItem);
         } else {
-            ItemStack fillerItem = getFillerItem();
-            if (fillerItem != null) {
-                inventory.setItem(nextPageSlot, fillerItem);
-            }
+            inventory.setItem(nextPageSlot, null);
         }
     }
 
@@ -234,7 +238,7 @@ public abstract class JPaginatedMenu extends JMenu {
      *
      * @param pageNumber the page number to go to
      */
-    public void goToPage(int pageNumber) {
+    public void moveToPage(int pageNumber) {
         currentPage = pageNumber;
         setupContents();
     }
