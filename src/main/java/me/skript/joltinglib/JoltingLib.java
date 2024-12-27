@@ -1,10 +1,8 @@
 package me.skript.joltinglib;
 
-import me.skript.joltinglib.colorcodes.JText;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
