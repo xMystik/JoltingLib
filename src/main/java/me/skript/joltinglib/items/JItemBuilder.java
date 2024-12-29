@@ -3,14 +3,12 @@ package me.skript.joltinglib.items;
 import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.colorcodes.JText;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -233,5 +231,62 @@ public class JItemBuilder {
     public ItemStack build() {
         item.setItemMeta(meta);
         return item;
+    }
+
+    /**
+     * Adds a glint to the given ItemStack
+     *
+     * @param item The ItemStack to add the glint
+     */
+    public static void addGlint(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return;
+        }
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta == null) {
+            return;
+        }
+
+        meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        item.setItemMeta(meta);
+    }
+
+    /**
+     * Removes the glint from the given ItemStack
+     *
+     * @param item The ItemStack to remove the glint
+     */
+    public static void removeGlint(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return;
+        }
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta == null) {
+            return;
+        }
+
+        meta.getEnchants().keySet().forEach(meta::removeEnchant);
+        item.setItemMeta(meta);
+    }
+
+    /**
+     * Checks if the given ItemStack has a glint effect
+     *
+     * @param item The ItemStack to check
+     * @return True if the ItemStack has a glint, false otherwise
+     */
+    public static boolean hasGlint(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta == null) {
+            return false;
+        }
+
+        return meta.hasEnchant(Enchantment.ARROW_INFINITE) && meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
     }
 }
