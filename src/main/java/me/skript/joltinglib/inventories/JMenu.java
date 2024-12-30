@@ -1,5 +1,6 @@
 package me.skript.joltinglib.inventories;
 
+import me.skript.joltinglib.colorcodes.JText;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -66,7 +67,7 @@ public abstract class JMenu implements InventoryHolder {
      */
     public void openMenu() {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = MiniMessage.miniMessage().deserialize(getTitle());
+        this.title = JText.format(getTitle());
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
         setupContents();

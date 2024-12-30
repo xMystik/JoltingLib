@@ -88,7 +88,7 @@ public class JItemBuilder {
      * @param lore a list of lore lines
      * @return the current {@code JItemBuilder} instance for chaining
      */
-    public JItemBuilder setLoreFromString(List<String> lore) {
+    public JItemBuilder setLoreFromStringList(List<String> lore) {
         if (supportsComponents) {
             List<Component> loreComponents = new ArrayList<>();
             for (String line : lore) {
@@ -113,7 +113,7 @@ public class JItemBuilder {
      * @param lore a list of Component objects
      * @return the current {@code JItemBuilder} instance for chaining
      */
-    public JItemBuilder setLoreFromComponent(List<Component> lore) {
+    public JItemBuilder setLoreFromComponentList(List<Component> lore) {
         if (supportsComponents) {
             meta.lore(new ArrayList<>(lore));
         } else {
@@ -133,7 +133,7 @@ public class JItemBuilder {
      * @return the current {@code JItemBuilder} instance for chaining
      */
     public JItemBuilder setLore(String lore) {
-        return setLoreFromString(List.of(lore));
+        return setLoreFromStringList(List.of(lore));
     }
 
     /**
@@ -143,7 +143,7 @@ public class JItemBuilder {
      * @return the current {@code JItemBuilder} instance for chaining
      */
     public JItemBuilder setLore(Component lore) {
-        return setLoreFromComponent(List.of(lore));
+        return setLoreFromComponentList(List.of(lore));
     }
 
     /**
@@ -289,6 +289,24 @@ public class JItemBuilder {
     }
 
     /**
+     * Adds a glint effect to the item being built
+     *
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder addGlint() {
+        if (item == null || item.getType() == Material.AIR) {
+            return this;
+        }
+
+        if (meta != null) {
+            meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return this;
+    }
+
+    /**
      * Builds the final {@link ItemStack} based on the current builder state
      *
      * @return the constructed {@link ItemStack}
@@ -352,6 +370,6 @@ public class JItemBuilder {
             return false;
         }
 
-        return meta.hasEnchant(Enchantment.ARROW_INFINITE) && meta.hasItemFlag(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+        return meta.hasEnchant(Enchantment.ARROW_INFINITE) && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
     }
 }

@@ -22,7 +22,7 @@ public class JText {
             return Component.empty();
         }
 
-        return miniMessage.deserialize(message);
+        return miniMessage.deserialize("<reset>" + message);
     }
 
     /**

@@ -1,7 +1,7 @@
 package me.skript.joltinglib.inventories;
 
+import me.skript.joltinglib.colorcodes.JText;
 import me.skript.joltinglib.items.JItemBuilder;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -90,7 +90,7 @@ public abstract class JPaginatedMenu extends JMenu {
     @Override
     public void openMenu(Player player) {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = MiniMessage.miniMessage().deserialize(getTitle());
+        this.title = JText.format(getTitle());
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
 
