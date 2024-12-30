@@ -59,9 +59,9 @@ public class JItemBuilder {
      */
     public JItemBuilder setDisplayName(String displayName) {
         if (supportsComponents) {
-            meta.displayName(MiniMessage.miniMessage().deserialize(displayName));
+            meta.displayName(MiniMessage.miniMessage().deserialize("<reset>" + displayName));
         } else {
-            meta.setDisplayName(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize(displayName)
+            meta.setDisplayName(LegacyComponentSerializer.legacySection().serialize(MiniMessage.miniMessage().deserialize("<reset>" + displayName)
             ));
         }
         return this;
@@ -92,13 +92,14 @@ public class JItemBuilder {
         if (supportsComponents) {
             List<Component> loreComponents = new ArrayList<>();
             for (String line : lore) {
-                loreComponents.add(JText.format(line));
+                loreComponents.add(JText.format("<reset>" + line));
             }
             meta.lore(loreComponents);
         } else {
             List<String> formattedLore = new ArrayList<>();
             for (String line : lore) {
-                formattedLore.add(LegacyComponentSerializer.legacySection().serialize(JText.format(line)
+                formattedLore.add(LegacyComponentSerializer.legacySection().serialize(
+                        JText.format("<reset>" + line)
                 ));
             }
             meta.setLore(formattedLore);
