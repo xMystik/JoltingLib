@@ -90,7 +90,7 @@ public abstract class JPaginatedMenu extends JMenu {
     @Override
     public void openMenu(Player player) {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = getTitle() != null ? getTitle() : MiniMessage.miniMessage().deserialize("Undefined");
+        this.title = MiniMessage.miniMessage().deserialize(getTitle());
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
 

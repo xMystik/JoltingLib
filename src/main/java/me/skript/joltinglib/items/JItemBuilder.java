@@ -54,7 +54,7 @@ public class JItemBuilder {
     /**
      * Sets the display name of the item using MiniMessage for color codes
      *
-     * @param displayName the new display name
+     * @param displayName the new display name String
      * @return the current {@code JItemBuilder} instance for chaining
      */
     public JItemBuilder setDisplayName(String displayName) {
@@ -68,12 +68,27 @@ public class JItemBuilder {
     }
 
     /**
+     * Sets the display name of the item using MiniMessage for color codes
+     *
+     * @param displayName the new display name Component
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder setDisplayName(Component displayName) {
+        if (supportsComponents) {
+            meta.displayName(displayName);
+        } else {
+            meta.setDisplayName(LegacyComponentSerializer.legacySection().serialize(displayName));
+        }
+        return this;
+    }
+
+    /**
      * Sets the lore of the item using MiniMessage for color codes
      *
      * @param lore a list of lore lines
      * @return the current {@code JItemBuilder} instance for chaining
      */
-    public JItemBuilder setLore(List<String> lore) {
+    public JItemBuilder setLoreFromString(List<String> lore) {
         if (supportsComponents) {
             List<Component> loreComponents = new ArrayList<>();
             for (String line : lore) {
@@ -92,13 +107,42 @@ public class JItemBuilder {
     }
 
     /**
+     * Sets the lore of the item using a list of Adventure Components
+     *
+     * @param lore a list of Component objects
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder setLoreFromComponent(List<Component> lore) {
+        if (supportsComponents) {
+            meta.lore(new ArrayList<>(lore));
+        } else {
+            List<String> formattedLore = new ArrayList<>();
+            for (Component line : lore) {
+                formattedLore.add(LegacyComponentSerializer.legacySection().serialize(line));
+            }
+            meta.setLore(formattedLore);
+        }
+        return this;
+    }
+
+    /**
      * Sets a single line of lore for the item using MiniMessage for color codes
      *
      * @param lore the lore line
      * @return the current {@code JItemBuilder} instance for chaining
      */
     public JItemBuilder setLore(String lore) {
-        return setLore(List.of(lore));
+        return setLoreFromString(List.of(lore));
+    }
+
+    /**
+     * Sets a single line of lore for the item using an Adventure Component
+     *
+     * @param lore the lore line as a Component
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder setLore(Component lore) {
+        return setLoreFromComponent(List.of(lore));
     }
 
     /**
@@ -115,6 +159,26 @@ public class JItemBuilder {
         } else {
             List<String> lore = meta.getLore() == null ? new ArrayList<>() : new ArrayList<>(meta.getLore());
             lore.add(LegacyComponentSerializer.legacySection().serialize(JText.format(line)));
+            meta.setLore(lore);
+        }
+        return this;
+    }
+
+
+    /**
+     * Adds a line to the item's existing lore using an Adventure Component
+     *
+     * @param line the new lore line as a Component
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder addLore(Component line) {
+        if (supportsComponents) {
+            List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
+            lore.add(line);
+            meta.lore(lore);
+        } else {
+            List<String> lore = meta.getLore() == null ? new ArrayList<>() : new ArrayList<>(meta.getLore());
+            lore.add(LegacyComponentSerializer.legacySection().serialize(line));
             meta.setLore(lore);
         }
         return this;

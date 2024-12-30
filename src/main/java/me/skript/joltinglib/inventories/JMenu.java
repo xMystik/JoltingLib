@@ -41,7 +41,7 @@ public abstract class JMenu implements InventoryHolder {
      *
      * @return the title of the inventory
      */
-    public abstract Component getTitle();
+    public abstract String getTitle();
 
     /**
      * Sets up the contents of the menu. This method must be implemented
@@ -66,7 +66,7 @@ public abstract class JMenu implements InventoryHolder {
      */
     public void openMenu() {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = getTitle() != null ? getTitle() : MiniMessage.miniMessage().deserialize("Undefined");
+        this.title = MiniMessage.miniMessage().deserialize(getTitle());
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
         setupContents();
@@ -88,7 +88,7 @@ public abstract class JMenu implements InventoryHolder {
      */
     public void openMenu(Player player) {
         this.size = (getSize() < 9 || getSize() > 54) ? 54 : getSize();
-        this.title = getTitle() != null ? getTitle() : MiniMessage.miniMessage().deserialize("Undefined");
+        this.title = MiniMessage.miniMessage().deserialize(getTitle());
 
         inventory = Bukkit.createInventory(this, this.size, this.title);
         setupContents();
