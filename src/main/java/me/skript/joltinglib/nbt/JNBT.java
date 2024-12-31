@@ -1,6 +1,5 @@
 package me.skript.joltinglib.nbt;
 
-import me.skript.joltinglib.JoltingLib;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

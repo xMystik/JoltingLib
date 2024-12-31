@@ -3,6 +3,7 @@ package me.skript.joltinglib.colorcodes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
@@ -22,7 +23,8 @@ public class JText {
             return Component.empty();
         }
 
-        return miniMessage.deserialize("<reset>" + message);
+        //return miniMessage.deserialize("<!italic>" + message);
+        return miniMessage.deserialize(message).decoration(TextDecoration.ITALIC, false);
     }
 
     /**
