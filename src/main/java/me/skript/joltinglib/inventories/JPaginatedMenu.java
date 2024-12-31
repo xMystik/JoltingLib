@@ -157,9 +157,9 @@ public abstract class JPaginatedMenu extends JMenu {
                         .build();
             }
             inventory.setItem(previousPageSlot, previousPageItem);
-        } else {
+        } /*else {
             inventory.setItem(previousPageSlot, null);
-        }
+        }*/
 
         int maxPage = calculateMaxPage();
         if (currentPage < maxPage - 1) {
@@ -170,9 +170,9 @@ public abstract class JPaginatedMenu extends JMenu {
                         .build();
             }
             inventory.setItem(nextPageSlot, nextPageItem);
-        } else {
+        } /*else {
             inventory.setItem(nextPageSlot, null);
-        }
+        }*/
     }
 
     /**
