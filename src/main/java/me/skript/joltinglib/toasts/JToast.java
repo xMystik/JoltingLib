@@ -1,5 +1,6 @@
 package me.skript.joltinglib.toasts;
 
+import me.skript.joltinglib.JDebug;
 import me.skript.joltinglib.JoltingLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -42,7 +43,7 @@ public class JToast {
     }
 
     private void createAdvancement() {
-        if(JoltingLib.getInstance().getServer().getVersion().contains("1.21")) {
+        if(JDebug.isVersionAtLeast("1.21")) {
             // Implements new format in case of 1.21+ server version.
 
             Bukkit.getUnsafe().loadAdvancement(key, "{\n" +

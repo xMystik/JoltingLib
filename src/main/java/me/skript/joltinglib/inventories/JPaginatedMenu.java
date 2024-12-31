@@ -153,7 +153,7 @@ public abstract class JPaginatedMenu extends JMenu {
             ItemStack previousPageItem = getPreviousPageItem();
             if (previousPageItem == null) {
                 previousPageItem = new JItemBuilder(Material.ARROW)
-                        .setDisplayName("&e&lPrevious Page")
+                        .setDisplayName("<yellow><bold>Previous Page")
                         .build();
             }
             inventory.setItem(previousPageSlot, previousPageItem);
@@ -166,7 +166,7 @@ public abstract class JPaginatedMenu extends JMenu {
             ItemStack nextPageItem = getNextPageItem();
             if (nextPageItem == null) {
                 nextPageItem = new JItemBuilder(Material.ARROW)
-                        .setDisplayName("&e&lNext Page")
+                        .setDisplayName("<yellow><bold>Next Page")
                         .build();
             }
             inventory.setItem(nextPageSlot, nextPageItem);

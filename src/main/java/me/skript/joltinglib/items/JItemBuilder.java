@@ -1,9 +1,7 @@
 package me.skript.joltinglib.items;
 
-import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.colorcodes.JText;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,6 +13,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -273,14 +272,15 @@ public class JItemBuilder {
     /**
      * Adds custom data to the item using the Persistent Data API
      *
+     * @param plugin the plugin instance to use for the NamespacedKey
      * @param type the {@link PersistentDataType} of the data
      * @param key the key for the data
      * @param value the value to store
      * @return the current {@code JItemBuilder} instance for chaining
      */
-    public <K, V> JItemBuilder addData(PersistentDataType<K, V> type, String key, V value) {
+    public <K, V> JItemBuilder addData(Plugin plugin, PersistentDataType<K, V> type, String key, V value) {
         if (meta != null) {
-            meta.getPersistentDataContainer().set(new NamespacedKey(JoltingLib.getInstance(), key), type, value);
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, key), type, value);
             item.setItemMeta(meta);
         }
         return this;

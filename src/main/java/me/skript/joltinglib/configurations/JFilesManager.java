@@ -96,7 +96,7 @@ public class JFilesManager<P extends Plugin> {
     }
 
     /**
-     * Deletes a file (YAML or JSON) by its key
+     * Deletes a file by its key
      *
      * @param key the key (path) of the file to delete
      */
