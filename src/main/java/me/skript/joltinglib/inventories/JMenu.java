@@ -133,4 +133,13 @@ public abstract class JMenu implements InventoryHolder {
     public @NotNull Inventory getInventory() {
         return inventory;
     }
+
+    /**
+     * Retrieves the owner of this menu
+     *
+     * @return the owning player
+     */
+    public Player getOwner() {
+        return Bukkit.getOfflinePlayer(this.owner).getPlayer();
+    }
 }

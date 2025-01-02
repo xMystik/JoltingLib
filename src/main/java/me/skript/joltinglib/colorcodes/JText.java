@@ -23,7 +23,6 @@ public class JText {
             return Component.empty();
         }
 
-        //return miniMessage.deserialize("<!italic>" + message);
         return miniMessage.deserialize(message).decoration(TextDecoration.ITALIC, false);
     }
 
@@ -41,8 +40,8 @@ public class JText {
      * @return a Component representing the interactive button
      */
     public static Component createButton(String buttonText, String hoverText, ClickEvent.Action clickAction, String clickValue) {
-        Component formattedButtonText = miniMessage.deserialize(buttonText);
-        Component formattedHoverText = miniMessage.deserialize(hoverText);
+        Component formattedButtonText = format(buttonText);
+        Component formattedHoverText = format(hoverText);
 
         // Create the button component with formatted text, hover event, and click event
         return Component.text()
@@ -65,7 +64,7 @@ public class JText {
      * @return a Component representing the interactive button
      */
     public static Component createButton(String buttonText, ClickEvent.Action clickAction, String clickValue) {
-        Component formattedButtonText = miniMessage.deserialize(buttonText);
+        Component formattedButtonText = format(buttonText);
 
         // Create the button component with formatted text and click event
         return Component.text()
