@@ -10,7 +10,7 @@ import java.util.logging.Level;
 public final class JoltingLib extends JavaPlugin {
 
     private static JoltingLib instance;
-    private final JFilesManager filesManager = new JFilesManager<>(this);
+    private JFilesManager filesManager = new JFilesManager<>(this);
     private JYML configurationFile;
     private JGlow glowManager;
 
