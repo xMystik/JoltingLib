@@ -7,13 +7,26 @@ import java.util.logging.Level;
 public class JDebug {
 
     /**
-     * Logs a message with a specified log level to the server console, prefixed with "[JDebug]"
+     * Logs a message to the server console
+     *
+     * @param message the message to be logged
+     */
+    public static void log(String message) {
+        if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
+            JoltingLib.getInstance().getLogger().log(Level.INFO, "[JDebug] " + message);
+        }
+    }
+
+    /**
+     * Logs a message with a specified log level to the server console
      *
      * @param level the logging level to indicate the severity of the message
      * @param message the message to be logged
      */
     public static void log(Level level, String message) {
-        JoltingLib.getInstance().getLogger().log(level, "[JDebug] " + message);
+        if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
+            JoltingLib.getInstance().getLogger().log(level, "[JDebug] " + message);
+        }
     }
 
     /**

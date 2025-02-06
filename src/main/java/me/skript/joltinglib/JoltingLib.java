@@ -3,6 +3,7 @@ package me.skript.joltinglib;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
@@ -33,5 +34,9 @@ public final class JoltingLib extends JavaPlugin {
 
     public static JoltingLib getInstance() {
         return instance;
+    }
+
+    public FileConfiguration getConfigurationFile() {
+        return this.configurationFile.getConfig();
     }
 }

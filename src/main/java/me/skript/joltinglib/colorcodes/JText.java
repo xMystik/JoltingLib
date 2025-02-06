@@ -31,6 +31,27 @@ public class JText {
      *
      * <p>This method allows for the creation of interactive buttons within chat messages.
      * The button text is formatted using MiniMessage for color codes and styling,
+     * while hover event provides interactivity</p>
+     *
+     * @param buttonText the text to display on the button
+     * @param hoverText the text to display when the button is hovered over
+     * @return a Component representing the interactive button
+     */
+    public static Component createButton(String buttonText, String hoverText) {
+        Component formattedButtonText = format(buttonText);
+        Component formattedHoverText = format(hoverText);
+
+        return Component.text()
+                .append(formattedButtonText)
+                .hoverEvent(HoverEvent.showText(formattedHoverText))
+                .build();
+    }
+
+    /**
+     * Creates a styled button as a Component with hover and click functionality
+     *
+     * <p>This method allows for the creation of interactive buttons within chat messages.
+     * The button text is formatted using MiniMessage for color codes and styling,
      * while hover and click events provide interactivity</p>
      *
      * @param buttonText the text to display on the button

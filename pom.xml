@@ -6,7 +6,7 @@
 
     <groupId>me.skript</groupId>
     <artifactId>JoltingLib</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <packaging>jar</packaging>
 
     <name>JoltingLib</name>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>fr.skytasul</groupId>
             <artifactId>glowingentities</artifactId>
-            <version>1.4</version>
+            <version>1.4.3</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
