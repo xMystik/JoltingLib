@@ -1,6 +1,6 @@
 package me.skript.joltinglib.inventories;
 
-import me.skript.joltinglib.colorcodes.JText;
+import me.skript.joltinglib.text.JText;
 import me.skript.joltinglib.items.JItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

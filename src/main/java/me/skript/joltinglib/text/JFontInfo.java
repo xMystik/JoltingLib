@@ -1,4 +1,4 @@
-package me.skript.joltinglib.colorcodes;
+package me.skript.joltinglib.text;
 
 public enum JFontInfo {
 

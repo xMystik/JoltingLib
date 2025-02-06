@@ -1,6 +1,6 @@
 package me.skript.joltinglib.items;
 
-import me.skript.joltinglib.colorcodes.JText;
+import me.skript.joltinglib.text.JText;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;

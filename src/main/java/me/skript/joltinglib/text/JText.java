@@ -1,4 +1,4 @@
-package me.skript.joltinglib.colorcodes;
+package me.skript.joltinglib.text;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -50,6 +50,22 @@ public class JText {
     /**
      * Creates a styled button as a Component with hover and click functionality
      *
+     * <p>This method allows for the creation of interactive buttons within chat messages</p>
+     *
+     * @param buttonText the text to display on the button
+     * @param hoverText the text to display when the button is hovered over
+     * @return a Component representing the interactive button
+     */
+    public static Component createButton(Component buttonText, Component hoverText) {
+        return Component.text()
+                .append(buttonText)
+                .hoverEvent(HoverEvent.showText(hoverText))
+                .build();
+    }
+
+    /**
+     * Creates a styled button as a Component with hover and click functionality
+     *
      * <p>This method allows for the creation of interactive buttons within chat messages.
      * The button text is formatted using MiniMessage for color codes and styling,
      * while hover and click events provide interactivity</p>
@@ -64,7 +80,6 @@ public class JText {
         Component formattedButtonText = format(buttonText);
         Component formattedHoverText = format(hoverText);
 
-        // Create the button component with formatted text, hover event, and click event
         return Component.text()
                 .append(formattedButtonText)
                 .hoverEvent(HoverEvent.showText(formattedHoverText))
@@ -87,7 +102,6 @@ public class JText {
     public static Component createButton(String buttonText, ClickEvent.Action clickAction, String clickValue) {
         Component formattedButtonText = format(buttonText);
 
-        // Create the button component with formatted text and click event
         return Component.text()
                 .append(formattedButtonText)
                 .clickEvent(ClickEvent.clickEvent(clickAction, clickValue))
