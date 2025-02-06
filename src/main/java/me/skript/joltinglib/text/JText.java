@@ -88,6 +88,25 @@ public class JText {
     }
 
     /**
+     * Creates a styled button as a Component with hover and click functionality
+     *
+     * <p>This method allows for the creation of interactive buttons within chat messages</p>
+     *
+     * @param buttonComponent the text to display on the button
+     * @param hoverComponent the text to display when the button is hovered over
+     * @param clickAction the action to perform when the button is clicked
+     * @param clickValue the value associated with the click action
+     * @return a Component representing the interactive button
+     */
+    public static Component createButton(Component buttonComponent, Component hoverComponent, ClickEvent.Action clickAction, String clickValue) {
+        return Component.text()
+                .append(buttonComponent)
+                .hoverEvent(HoverEvent.showText(hoverComponent))
+                .clickEvent(ClickEvent.clickEvent(clickAction, clickValue))
+                .build();
+    }
+
+    /**
      * Creates a styled button as a Component with click functionality
      *
      * <p>This method allows for the creation of interactive buttons within chat messages.
