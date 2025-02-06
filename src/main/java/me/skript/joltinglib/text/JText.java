@@ -52,8 +52,8 @@ public class JText {
      *
      * <p>This method allows for the creation of interactive buttons within chat messages</p>
      *
-     * @param buttonText the text to display on the button
-     * @param hoverText the text to display when the button is hovered over
+     * @param buttonText the component to display on the button
+     * @param hoverText the component to display when the button is hovered over
      * @return a Component representing the interactive button
      */
     public static Component createButton(Component buttonText, Component hoverText) {
@@ -92,8 +92,8 @@ public class JText {
      *
      * <p>This method allows for the creation of interactive buttons within chat messages</p>
      *
-     * @param buttonComponent the text to display on the button
-     * @param hoverComponent the text to display when the button is hovered over
+     * @param buttonComponent the component to display on the button
+     * @param hoverComponent the component to display when the button is hovered over
      * @param clickAction the action to perform when the button is clicked
      * @param clickValue the value associated with the click action
      * @return a Component representing the interactive button
@@ -123,6 +123,23 @@ public class JText {
 
         return Component.text()
                 .append(formattedButtonText)
+                .clickEvent(ClickEvent.clickEvent(clickAction, clickValue))
+                .build();
+    }
+
+    /**
+     * Creates a styled button as a Component with click functionality
+     *
+     * <p>This method allows for the creation of interactive buttons within chat messages.</p>
+     *
+     * @param buttonComponent the component to display on the button
+     * @param clickAction the action to perform when the button is clicked
+     * @param clickValue the value associated with the click action
+     * @return a Component representing the interactive button
+     */
+    public static Component createButton(Component buttonComponent, ClickEvent.Action clickAction, String clickValue) {
+        return Component.text()
+                .append(buttonComponent)
                 .clickEvent(ClickEvent.clickEvent(clickAction, clickValue))
                 .build();
     }
@@ -188,15 +205,9 @@ public class JText {
         for (char c : plainMessage.toCharArray()) {
             if (c == '§') {
                 previousCode = true;
-                continue;
             } else if (previousCode) {
                 previousCode = false;
-                if (c == 'l' || c == 'L') {
-                    isBold = true;
-                    continue;
-                } else {
-                    isBold = false;
-                }
+                isBold = c == 'l' || c == 'L';
             } else {
                 JFontInfo dFI = JFontInfo.getDefaultFontInfo(c);
                 messagePxSize += isBold ? dFI.getBoldLength() : dFI.getLength();

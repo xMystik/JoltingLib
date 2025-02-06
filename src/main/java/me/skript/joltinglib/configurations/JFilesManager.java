@@ -13,7 +13,7 @@ public class JFilesManager<P extends Plugin> {
     /**
      * Constructs a new instance of JFilesManager
      *
-     * @param plugin the plugin instance using this file manager.
+     * @param plugin the plugin instance using this file manager
      */
     public JFilesManager(P plugin) {
         this.plugin = plugin;

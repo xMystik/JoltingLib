@@ -23,8 +23,8 @@ public class JNBT {
      * Checks if a specific key exists on the item
      *
      * @param plugin the plugin instance to use for the NamespacedKey
-     * @param item   the item to check
-     * @param key    the key to look for
+     * @param item the item to check
+     * @param key the key to look for
      * @return true if tag exists, false otherwise
      */
     public static boolean hasData(Plugin plugin, ItemStack item, String key) {
@@ -49,7 +49,7 @@ public class JNBT {
      *
      * @param plugin the plugin instance to use for the NamespacedKey
      * @param player the player to check
-     * @param key    the key to look for
+     * @param key the key to look for
      * @return true if tag exists, false otherwise
      */
     public static boolean hasData(Plugin plugin, Player player, String key) {
@@ -64,7 +64,7 @@ public class JNBT {
      *
      * @param plugin the plugin instance to use for the NamespacedKey
      * @param entity the entity to check
-     * @param key    the key to look for
+     * @param key the key to look for
      * @return true if tag exists, false otherwise
      */
     public static boolean hasData(Plugin plugin, Entity entity, String key) {
@@ -86,8 +86,8 @@ public class JNBT {
      * Checks if a specific key exists on the block's state
      *
      * @param plugin the plugin instance to use for the NamespacedKey
-     * @param state  the block state to check
-     * @param key    the key to look for
+     * @param state the block state to check
+     * @param key the key to look for
      * @return true if tag exists, false otherwise
      */
     public static boolean hasData(Plugin plugin, BlockState state, String key) {
@@ -109,10 +109,10 @@ public class JNBT {
      * Adds certain data to the specified item
      *
      * @param plugin the plugin instance to use for the NamespacedKey
-     * @param item   the item that will receive the data
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to store data into
-     * @param value  the data to store
+     * @param item the item that will receive the data
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to store data into
+     * @param value the data to store
      */
     public static <K, V> void addData(Plugin plugin, ItemStack item, PersistentDataType<K, V> type, String key, V value) {
         if (item == null || item.getItemMeta() == null) {
@@ -129,9 +129,9 @@ public class JNBT {
      *
      * @param plugin the plugin instance to use for the NamespacedKey
      * @param player the player that will receive the data
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to store data into
-     * @param value  the data to store
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to store data into
+     * @param value the data to store
      */
     public static <K, V> void addData(Plugin plugin, Player player, PersistentDataType<K, V> type, String key, V value) {
         if (player == null) {
@@ -145,9 +145,9 @@ public class JNBT {
      *
      * @param plugin the plugin instance to use for the NamespacedKey
      * @param entity the entity that will receive the data
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to store data into
-     * @param value  the data to store
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to store data into
+     * @param value the data to store
      */
     public static <K, V> void addData(Plugin plugin, Entity entity, PersistentDataType<K, V> type, String key, V value) {
         if (entity == null) {
@@ -163,10 +163,10 @@ public class JNBT {
      * Otherwise, the block’s chunk container is used
      *
      * @param plugin the plugin instance to use for the NamespacedKey
-     * @param state  the block state that will receive the data
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to store data into
-     * @param value  the data to store
+     * @param state the block state that will receive the data
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to store data into
+     * @param value the data to store
      */
     public static <K, V> void addData(Plugin plugin, BlockState state, PersistentDataType<K, V> type, String key, V value) {
         if (state == null) {
@@ -182,12 +182,75 @@ public class JNBT {
     }
 
     /**
+     * Removes the data associated with the specified key from the item
+     *
+     * @param plugin the plugin instance to use for the NamespacedKey
+     * @param item the item to remove the data from
+     * @param key the key to remove
+     */
+    public static void removeData(Plugin plugin, ItemStack item, String key) {
+        if (item == null || item.getItemMeta() == null) {
+            return;
+        }
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().remove(new NamespacedKey(plugin, key));
+        item.setItemMeta(meta);
+    }
+
+    /**
+     * Removes the data associated with the specified key from the player
+     *
+     * @param plugin the plugin instance to use for the NamespacedKey
+     * @param player the player to remove the data from
+     * @param key the key to remove
+     */
+    public static void removeData(Plugin plugin, Player player, String key) {
+        if (player == null) {
+            return;
+        }
+        removeData(plugin, (Entity) player, key);
+    }
+
+    /**
+     * Removes the data associated with the specified key from the entity
+     *
+     * @param plugin the plugin instance to use for the NamespacedKey
+     * @param entity the entity to remove the data from
+     * @param key the key to remove
+     */
+    public static void removeData(Plugin plugin, Entity entity, String key) {
+        if (entity == null) {
+            return;
+        }
+        entity.getPersistentDataContainer().remove(new NamespacedKey(plugin, key));
+    }
+
+    /**
+     * Removes the data associated with the specified key from the block's state
+     *
+     * @param plugin the plugin instance to use for the NamespacedKey
+     * @param state the block state to remove the data from
+     * @param key the key to remove
+     */
+    public static void removeData(Plugin plugin, BlockState state, String key) {
+        if (state == null) {
+            return;
+        }
+        PersistentDataContainer container = getBlockDataContainer(state);
+        NamespacedKey namespacedKey = getBlockNamespacedKey(plugin, state, key);
+        container.remove(namespacedKey);
+        if (state instanceof PersistentDataHolder) {
+            state.update();
+        }
+    }
+
+    /**
      * Receives the available data if it exists from the specified item
      *
      * @param plugin the plugin instance to use for the NamespacedKey
-     * @param item   the item that we will get the data from
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to receive the data from
+     * @param item the item that we will get the data from
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to receive the data from
      * @return the stored data depending on the type data, or null if not found
      */
     public static <K, V> V getData(Plugin plugin, ItemStack item, PersistentDataType<K, V> type, String key) {
@@ -199,8 +262,8 @@ public class JNBT {
      *
      * @param plugin the plugin instance to use for the NamespacedKey
      * @param player the player to get the data from
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to receive the data from
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to receive the data from
      * @return the stored data depending on the type data, or null if not found
      */
     public static <K, V> V getData(Plugin plugin, Player player, PersistentDataType<K, V> type, String key) {
@@ -215,8 +278,8 @@ public class JNBT {
      *
      * @param plugin the plugin instance to use for the NamespacedKey
      * @param entity the entity to get the data from
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to receive the data from
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to receive the data from
      * @return the stored data depending on the type data, or null if not found
      */
     public static <K, V> V getData(Plugin plugin, Entity entity, PersistentDataType<K, V> type, String key) {
@@ -230,9 +293,9 @@ public class JNBT {
      * Receives the available data if it exists from the specified block's state
      *
      * @param plugin the plugin instance to use for the NamespacedKey
-     * @param state  the block state to get the data from
-     * @param type   {@link PersistentDataType} available data types
-     * @param key    the key to receive the data from
+     * @param state the block state to get the data from
+     * @param type {@link PersistentDataType} available data types
+     * @param key the key to receive the data from
      * @return the stored data depending on the type data, or null if not found
      */
     public static <K, V> V getData(Plugin plugin, BlockState state, PersistentDataType<K, V> type, String key) {
