@@ -1,5 +1,6 @@
 package me.skript.joltinglib;
 
+import me.skript.joltinglib.bossbars.JBossBar;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
@@ -12,6 +13,7 @@ public final class JoltingLib extends JavaPlugin {
 
     private static JoltingLib instance;
     private JFilesManager filesManager = new JFilesManager<>(this);
+    private JBossBar bossBarManager;
     private JYML configurationFile;
     private JGlow glowManager;
 
@@ -19,6 +21,8 @@ public final class JoltingLib extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.glowManager = new JGlow(this);
+
+        this.bossBarManager = new JBossBar(this);
 
         this.configurationFile = filesManager.createYML("configuration");
 

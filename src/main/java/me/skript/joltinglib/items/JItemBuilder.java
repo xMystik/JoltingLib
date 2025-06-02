@@ -96,8 +96,7 @@ public class JItemBuilder {
         } else {
             List<String> formattedLore = new ArrayList<>();
             for (String line : lore) {
-                formattedLore.add(LegacyComponentSerializer.legacySection().serialize(JText.format(line)
-                ));
+                formattedLore.add(LegacyComponentSerializer.legacySection().serialize(JText.format(line)));
             }
             meta.setLore(formattedLore);
         }

@@ -13,7 +13,7 @@ public class JDebug {
      */
     public static void log(String message) {
         if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
-            JoltingLib.getInstance().getLogger().log(Level.INFO, "[JDebug] " + message);
+            JoltingLib.getInstance().getLogger().log(Level.INFO, message);
         }
     }
 
@@ -25,7 +25,7 @@ public class JDebug {
      */
     public static void log(Level level, String message) {
         if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
-            JoltingLib.getInstance().getLogger().log(level, "[JDebug] " + message);
+            JoltingLib.getInstance().getLogger().log(level, message);
         }
     }
 

@@ -235,7 +235,8 @@ public class JGlow {
      */
     public void addGlowToBlocks(List<Block> blocks, List<Player> viewers, ChatColor color) {
         for (Block block : blocks) {
-            if (block.getWorld() != null && isAllowedBlock(block)) {
+            block.getWorld();
+            if (isAllowedBlock(block)) {
                 addGlowToBlock(block, viewers, color);
             }
         }
@@ -301,7 +302,8 @@ public class JGlow {
      */
     public void addGlowToBlocks(List<Block> blocks, List<Player> viewers, ChatColor color, long duration) {
         for (Block block : blocks) {
-            if (block.getWorld() != null && isAllowedBlock(block)) {
+            block.getWorld();
+            if (isAllowedBlock(block)) {
                 addGlowToBlock(block, viewers, color, duration);
             }
         }
@@ -355,9 +357,7 @@ public class JGlow {
      */
     public void removeGlowFromBlocks(List<Block> blocks, List<Player> viewers) {
         for (Block block : blocks) {
-            if (block.getWorld() != null) {
-                removeGlowFromBlock(block, viewers);
-            }
+            removeGlowFromBlock(block, viewers);
         }
     }
 
@@ -434,7 +434,7 @@ public class JGlow {
      * Makes the {@link Entity} glow for a list of players with the specified color
      * and removes the glow after the given duration
      *
-     * @param entity the entity to make glow
+     * @param entity the entity to add the glow
      * @param viewers the list of players who will see the entity glowing
      * @param color the color of the glowing effect
      * @param duration the duration (in seconds) for which the entity will glow

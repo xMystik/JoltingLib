@@ -6,7 +6,7 @@
 
     <groupId>me.skript</groupId>
     <artifactId>JoltingLib</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
     <packaging>jar</packaging>
 
     <name>JoltingLib</name>

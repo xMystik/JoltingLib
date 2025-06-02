@@ -51,11 +51,11 @@ public class JBarBuilder {
             double warningThreshold = minPercentageForSegment + segmentPercentage * 0.5;
 
             if (percent > warningThreshold) {
-                bar.append(fullColor).append(character);
+                bar.append("<").append(fullColor.toString().toLowerCase()).append(">").append(character);
             } else if (percent > minPercentageForSegment) {
-                bar.append(warningColor).append(character);
+                bar.append("<").append(warningColor.toString().toLowerCase()).append(">").append(character);
             } else {
-                bar.append(emptyColor).append(character);
+                bar.append("<").append(emptyColor.toString().toLowerCase()).append(">").append(character);
             }
         }
         return bar.toString();

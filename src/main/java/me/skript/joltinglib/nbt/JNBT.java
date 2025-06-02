@@ -313,7 +313,7 @@ public class JNBT {
      * @param item the item to get the tags from
      * @return a list of all tag keys, or an empty list if no tags are found
      */
-    public static List<String> getAllTags(ItemStack item) {
+    public static List<String> getAllData(ItemStack item) {
         List<String> tags = new ArrayList<>();
 
         if (item == null || item.getItemMeta() == null) {
@@ -336,8 +336,8 @@ public class JNBT {
      * @param player the player to get the tags from
      * @return a list of all tag keys, or an empty list if no tags are found
      */
-    public static List<String> getAllTags(Player player) {
-        return getAllTags((Entity) player);
+    public static List<String> getAllData(Player player) {
+        return getAllData((Entity) player);
     }
 
     /**
@@ -346,7 +346,7 @@ public class JNBT {
      * @param entity the entity to get the tags from
      * @return a list of all tag keys, or an empty list if no tags are found
      */
-    public static List<String> getAllTags(Entity entity) {
+    public static List<String> getAllData(Entity entity) {
         List<String> tags = new ArrayList<>();
         if (entity == null) {
             return tags;
@@ -365,7 +365,7 @@ public class JNBT {
      * @param state the block state to get the tags from
      * @return a list of all tag keys, or an empty list if no tags are found
      */
-    public static List<String> getAllTags(BlockState state) {
+    public static List<String> getAllData(BlockState state) {
         List<String> tags = new ArrayList<>();
         if (state == null) {
             return tags;
