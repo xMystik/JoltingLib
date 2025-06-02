@@ -296,7 +296,7 @@ public class JItemBuilder {
         }
 
         if (meta != null) {
-            meta.addEnchant(Enchantment.PROTECTION, 1, true);
+            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             item.setItemMeta(meta);
         }
@@ -329,7 +329,7 @@ public class JItemBuilder {
             return;
         }
 
-        meta.addEnchant(Enchantment.PROTECTION, 1, true);
+        meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(meta);
     }
@@ -367,6 +367,6 @@ public class JItemBuilder {
             return false;
         }
 
-        return meta.hasEnchant(Enchantment.PROTECTION) && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
+        return meta.hasEnchant(Enchantment.PROTECTION_ENVIRONMENTAL) && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
     }
 }

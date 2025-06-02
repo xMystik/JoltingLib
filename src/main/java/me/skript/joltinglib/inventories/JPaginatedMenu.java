@@ -126,13 +126,13 @@ public abstract class JPaginatedMenu extends JMenu {
         if (useAllEmptySlots) {
             for (int i = 0; i < inventory.getSize(); i++) {
                 if (inventory.getItem(i) == null && !itemsToPaginate.isEmpty()) {
-                    inventory.setItem(i, itemsToPaginate.removeFirst());
+                    inventory.setItem(i, itemsToPaginate.remove(0));
                 }
             }
         } else {
             for (int slot : paginationSlots) {
                 if (slot >= 0 && slot < inventory.getSize() && !itemsToPaginate.isEmpty()) {
-                    inventory.setItem(slot, itemsToPaginate.removeFirst());
+                    inventory.setItem(slot, itemsToPaginate.remove(0));
                 }
             }
         }
