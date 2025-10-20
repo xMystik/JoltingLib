@@ -13,20 +13,113 @@ import java.util.List;
 
 public class JText {
 
-    private static final MiniMessage miniMessage = MiniMessage.miniMessage();
-
     /**
-     * Formats a string by converting custom hex color codes and alternate color codes into valid Minecraft color codes using MiniMessage
+     * Parses and formats a string supporting both <b>legacy color codes</b> (e.g. {@code &c}, {@code §6}, {@code &#ff0000})
+     * and <b>MiniMessage tags</b> (e.g. {@code <bold>}, {@code <gradient:#00ffcc:#ff00ff>}).
+     * <p>
+     * This method allows mixed usage of both systems within the same input,
+     * seamlessly converting legacy color codes into MiniMessage-compatible tags before
+     * processing the entire string with {@link net.kyori.adventure.text.minimessage.MiniMessage}.
+     * <p>
+     * For example:
+     * <pre>{@code
+     * JText.format("&6<bold>Hello &cWorld!</bold>");
+     * }</pre>
+     * Produces a gold bold "Hello" followed by red bold "World!".
+     * <p>
+     * <b>Supported features:</b>
+     * <ul>
+     *     <li>Legacy color codes using {@code &} or {@code §} prefixes (0–9, a–f)</li>
+     *     <li>Legacy formatting codes: {@code &l} (bold), {@code &n} (underline), {@code &o} (italic), {@code &m} (strikethrough), {@code &k} (obfuscated), {@code &r} (reset)</li>
+     *     <li>Legacy hex colors in the form {@code &#RRGGBB}</li>
+     *     <li>Full MiniMessage support for tags like {@code <gradient>}, {@code <hover>}, {@code <click>}, etc.</li>
+     *     <li>Automatic normalization of § to &</li>
+     *     <li>Automatic fallback to legacy deserialization if MiniMessage parsing fails</li>
+     * </ul>
      *
-     * @param message the string to format, which may include custom hex and alternate color codes
-     * @return the formatted string with valid color codes as a Component
+     * @param message the text to format; may include legacy and/or MiniMessage formatting
+     * @return a fully formatted {@link net.kyori.adventure.text.Component}
      */
     public static Component format(String message) {
-        if (message == null || message.isEmpty()) {
-            return Component.empty();
+        if (message == null || message.isEmpty()) return Component.empty();
+
+        // Normalize section char to ampersand
+        String s = message.replace('§', '&');
+
+        StringBuilder out = new StringBuilder(s.length() * 2);
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
+            if (c == '&' && i + 1 < s.length()) {
+                char code = Character.toLowerCase(s.charAt(i + 1));
+
+                // Hex form: &#[RRGGBB]
+                if (code == '#' && i + 7 < s.length()) {
+                    String maybeHex = s.substring(i + 2, i + 8);
+                    if (maybeHex.matches("(?i)[0-9a-f]{6}")) {
+                        out.append("<#").append(maybeHex).append(">");
+                        i += 7;
+                        continue;
+                    }
+                }
+
+                // Map legacy code to MiniMessage tag(s)
+                String tag = switch (code) {
+                    // Colors
+                    case '0' -> "<black>";
+                    case '1' -> "<dark_blue>";
+                    case '2' -> "<dark_green>";
+                    case '3' -> "<dark_aqua>";
+                    case '4' -> "<dark_red>";
+                    case '5' -> "<dark_purple>";
+                    case '6' -> "<gold>";
+                    case '7' -> "<gray>";
+                    case '8' -> "<dark_gray>";
+                    case '9' -> "<blue>";
+                    case 'a' -> "<green>";
+                    case 'b' -> "<aqua>";
+                    case 'c' -> "<red>";
+                    case 'd' -> "<light_purple>";
+                    case 'e' -> "<yellow>";
+                    case 'f' -> "<white>";
+
+                    // Formats
+                    case 'k' -> "<obfuscated>";
+                    case 'l' -> "<bold>";
+                    case 'm' -> "<strikethrough>";
+                    case 'n' -> "<underline>";
+                    case 'o' -> "<italic>";
+
+                    // Reset
+                    case 'r' -> "<reset>";
+
+                    default -> null;
+                };
+
+                if (tag != null) {
+                    out.append(tag);
+                    i++; // skip the code character
+                    continue;
+                }
+
+                // Not a recognized legacy token -> append literal '&'
+                out.append('&');
+                continue;
+            }
+
+            // Normal char
+            out.append(c);
         }
 
-        return miniMessage.deserialize(message).decoration(TextDecoration.ITALIC, false);
+        String combined = out.toString();
+
+        // Parse with MiniMessage
+        try {
+            return MiniMessage.miniMessage().deserialize(combined).decoration(TextDecoration.ITALIC, false);
+        } catch (Exception ex) {
+            return LegacyComponentSerializer.legacyAmpersand().deserialize(message).decoration(TextDecoration.ITALIC, false);
+        }
     }
 
     /**
