@@ -6,6 +6,8 @@ import java.util.logging.Level;
 
 public class JDebug {
 
+    private JDebug() {}
+
     /**
      * Logs a message to the server console
      *

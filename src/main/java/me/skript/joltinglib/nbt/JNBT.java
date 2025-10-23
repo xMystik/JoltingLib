@@ -19,6 +19,8 @@ import java.util.Set;
 
 public class JNBT {
 
+    private JNBT() {}
+
     /**
      * Checks if a specific key exists on the item
      *

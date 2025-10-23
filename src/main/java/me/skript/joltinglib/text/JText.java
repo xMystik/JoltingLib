@@ -13,6 +13,8 @@ import java.util.List;
 
 public class JText {
 
+    private JText () {}
+
     /**
      * Parses and formats a string supporting both <b>legacy color codes</b> (e.g. {@code &c}, {@code §6}, {@code &#ff0000})
      * and <b>MiniMessage tags</b> (e.g. {@code <bold>}, {@code <gradient:#00ffcc:#ff00ff>}).
@@ -120,6 +122,10 @@ public class JText {
         } catch (Exception ex) {
             return LegacyComponentSerializer.legacyAmpersand().deserialize(message).decoration(TextDecoration.ITALIC, false);
         }
+    }
+
+    public static String formatLegacy(String message) {
+        return LegacyComponentSerializer.legacySection().serialize(JText.format(message));
     }
 
     /**
