@@ -12,24 +12,22 @@ public class JDebug {
     /**
      * Logs a message to the server console
      *
+     * @param plugin The plugin instance
      * @param message the message to be logged
      */
     public static void log(Plugin plugin, String message) {
-        if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
-            plugin.getLogger().log(Level.INFO, plugin.getName() + message);
-        }
+        plugin.getLogger().log(Level.INFO, plugin.getName() + message);
     }
 
     /**
      * Logs a message with a specified log level to the server console
      *
+     * @param plugin The plugin instance
      * @param level the logging level to indicate the severity of the message
      * @param message the message to be logged
      */
     public static void log(Plugin plugin, Level level, String message) {
-        if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
-            plugin.getLogger().log(level, plugin.getName() + message);
-        }
+        plugin.getLogger().log(level, plugin.getName() + message);
     }
 
     /**
