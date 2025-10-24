@@ -1,11 +1,13 @@
 package me.skript.joltinglib.items;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import me.skript.joltinglib.text.JText;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -189,10 +191,14 @@ public class JItemBuilder {
      */
     public JItemBuilder setPlayerSkull(UUID playerUUID) {
         if (meta instanceof SkullMeta skullMeta) {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+            PlayerProfile profile = offlinePlayer.getPlayerProfile();
 
-            // Set the owning player of the skull
-            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerUUID));
+            if (!offlinePlayer.isOnline()) {
+                profile.complete(true);
+            }
 
+            skullMeta.setPlayerProfile(profile);
             item.setItemMeta(skullMeta);
         }
         return this;
@@ -296,7 +302,7 @@ public class JItemBuilder {
         }
 
         if (meta != null) {
-            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
+            meta.addEnchant(Enchantment.PROTECTION, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             item.setItemMeta(meta);
         }
@@ -329,7 +335,7 @@ public class JItemBuilder {
             return;
         }
 
-        meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
+        meta.addEnchant(Enchantment.PROTECTION, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(meta);
     }
@@ -367,6 +373,6 @@ public class JItemBuilder {
             return false;
         }
 
-        return meta.hasEnchant(Enchantment.PROTECTION_ENVIRONMENTAL) && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
+        return meta.hasEnchant(Enchantment.PROTECTION) && meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
     }
 }

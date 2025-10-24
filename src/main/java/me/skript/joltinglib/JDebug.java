@@ -1,12 +1,36 @@
 package me.skript.joltinglib;
 
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Level;
 
 public class JDebug {
 
     private JDebug() {}
+
+    /**
+     * Logs a message to the server console
+     *
+     * @param message the message to be logged
+     */
+    public static void log(Plugin plugin, String message) {
+        if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
+            plugin.getLogger().log(Level.INFO, plugin.getName() + message);
+        }
+    }
+
+    /**
+     * Logs a message with a specified log level to the server console
+     *
+     * @param level the logging level to indicate the severity of the message
+     * @param message the message to be logged
+     */
+    public static void log(Plugin plugin, Level level, String message) {
+        if(JoltingLib.getInstance().getConfigurationFile().getBoolean("debug-enabled", false)) {
+            plugin.getLogger().log(level, plugin.getName() + message);
+        }
+    }
 
     /**
      * Logs a message to the server console

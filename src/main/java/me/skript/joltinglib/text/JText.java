@@ -124,6 +124,16 @@ public class JText {
         }
     }
 
+    /**
+     * Converts a message containing MiniMessage or legacy color codes into a
+     * legacy-formatted string using the '§' section symbol.
+     * <p>
+     * This method first processes MiniMessage-style formatting (via {@link JText#format(String)}),
+     * then serializes the resulting component back into legacy text.
+     *
+     * @param message The input message containing MiniMessage or legacy formatting codes.
+     * @return The fully formatted legacy string, ready for display in Minecraft.
+     */
     public static String formatLegacy(String message) {
         return LegacyComponentSerializer.legacySection().serialize(JText.format(message));
     }
