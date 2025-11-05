@@ -27,14 +27,26 @@ public class RelationManager {
 
     // ===== Access =====
     public static boolean areInParty(Player p1, Player p2) {
-        return partyProvider != null && partyProvider.areInSameParty(p1, p2);
+        if (partyProvider == null) {
+            JDebug.log("[JoltingLib] No Party provider registered!");
+            return false;
+        }
+        return partyProvider.areInSameParty(p1, p2);
     }
 
     public static boolean areFriends(Player p1, Player p2) {
-        return friendsProvider != null && friendsProvider.areFriends(p1, p2);
+        if (friendsProvider == null) {
+            JDebug.log("[JoltingLib] No Friends provider registered!");
+            return false;
+        }
+        return friendsProvider.areFriends(p1, p2);
     }
 
     public static boolean hasPvPActive(Player player) {
-        return pvpProvider != null && pvpProvider.hasPvPActive(player);
+        if (pvpProvider == null) {
+            JDebug.log("[JoltingLib] No PvP provider registered!");
+            return false;
+        }
+        return pvpProvider.hasPvPActive(player);
     }
 }
