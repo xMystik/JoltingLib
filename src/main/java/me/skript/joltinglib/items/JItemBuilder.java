@@ -3,6 +3,7 @@ package me.skript.joltinglib.items;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import me.skript.joltinglib.text.JText;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -271,6 +273,49 @@ public class JItemBuilder {
      */
     public JItemBuilder setUnbreakable(boolean unbreakable) {
         meta.setUnbreakable(unbreakable);
+        return this;
+    }
+
+    /**
+     * Sets a custom tooltip style for the item using a {@link NamespacedKey}.
+     * <p>
+     * This method supports both vanilla and custom tooltip styles:
+     * <ul>
+     *   <li>If the key matches a known vanilla color (e.g. "white", "blue"), it will use the {@code minecraft} namespace.</li>
+     *   <li>If the key contains a namespace (e.g. "plugin:style"), it will be used as provided.</li>
+     *   <li>Otherwise, the {@code joltinglib} namespace will be applied by default.</li>
+     * </ul>
+     *
+     * @param keyName the tooltip style key (e.g. "white", "minecraft:gold", "joltinglib:custom")
+     * @return the current {@link JItemBuilder} instance for chaining
+     */
+    public JItemBuilder setTooltipStyle(String keyName) {
+        if (!(meta instanceof ItemMeta itemMeta)) return this;
+        if (keyName == null || keyName.isEmpty()) return this;
+
+        keyName = keyName.toLowerCase();
+
+        NamespacedKey key;
+        // List of vanilla tooltip styles available in 1.21+
+        List<String> vanillaStyles = List.of(
+                "white", "gray", "black", "blue", "green", "aqua",
+                "red", "light_gray", "dark_gray", "dark_red", "dark_green",
+                "dark_blue", "dark_aqua", "yellow", "gold", "light_purple", "dark_purple"
+        );
+
+        if (keyName.contains(":")) {
+            // User provided full namespace, e.g. "minecraft:white" or "custom:my_style"
+            key = NamespacedKey.fromString(keyName);
+        } else if (vanillaStyles.contains(keyName)) {
+            // Default to Minecraft’s namespace for known tooltip colors
+            key = new NamespacedKey("minecraft", keyName);
+        } else {
+            // Otherwise, default to JoltingLib namespace
+            key = new NamespacedKey("joltinglib", keyName);
+        }
+
+        itemMeta.setTooltipStyle(key);
+        item.setItemMeta(itemMeta);
         return this;
     }
 

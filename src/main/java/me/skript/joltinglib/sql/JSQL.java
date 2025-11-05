@@ -22,7 +22,7 @@ public class JSQL {
     }
 
     @FunctionalInterface
-    private interface RowMapper<T> {
+    public interface RowMapper<T> {
         T map(ResultSet rs) throws SQLException;
     }
 
