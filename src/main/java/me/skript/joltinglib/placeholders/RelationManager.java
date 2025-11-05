@@ -11,17 +11,14 @@ public class RelationManager {
 
     // ===== Registration =====
     public static void setPartyProvider(PartyProvider provider) {
-        JDebug.log("[JoltingLib] Party provider registered: " + provider.getClass().getSimpleName());
         partyProvider = provider;
     }
 
     public static void setFriendsProvider(FriendsProvider provider) {
-        JDebug.log("[JoltingLib] Friends provider registered: " + provider.getClass().getSimpleName());
         friendsProvider = provider;
     }
 
     public static void setPvPProvider(PvPProvider provider) {
-        JDebug.log("[JoltingLib] PvP provider registered: " + provider.getClass().getSimpleName());
         pvpProvider = provider;
     }
 
