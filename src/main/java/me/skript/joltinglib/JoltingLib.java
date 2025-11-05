@@ -3,7 +3,6 @@ package me.skript.joltinglib;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
-import me.skript.joltinglib.placeholders.Placeholders;
 import me.skript.joltinglib.text.JText;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,16 +26,6 @@ public final class JoltingLib extends JavaPlugin implements Listener {
         this.configurationFile = filesManager.createYML("configuration");
 
         this.getLogger().log(Level.INFO, "[JoltingLib] Library has been enabled!");
-
-        // Placeholders
-        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
-            new Placeholders(this).register();
-
-            Bukkit.getConsoleSender().sendMessage(JText.format("<dark_aqua><bold>[JoltingLib]</bold> <gray>Placeholders have been registered!"));
-        }
-        else {
-            Bukkit.getConsoleSender().sendMessage(JText.format("<dark_red><bold>[JoltingLib]</bold> <gray>Could not register placeholders!"));
-        }
     }
 
     @Override
