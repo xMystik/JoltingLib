@@ -1,5 +1,6 @@
-package me.skript.joltinglib;
+package me.skript.joltinglib.utilities;
 
+import me.skript.joltinglib.JoltingLib;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 

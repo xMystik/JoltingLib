@@ -1,6 +1,6 @@
 package me.skript.joltinglib.toasts;
 
-import me.skript.joltinglib.JDebug;
+import me.skript.joltinglib.utilities.JDebug;
 import me.skript.joltinglib.JoltingLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

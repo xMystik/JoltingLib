@@ -3,7 +3,10 @@ package me.skript.joltinglib;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
+import me.skript.joltinglib.holograms.JHologramBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.TextDisplay;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,6 +25,29 @@ public final class JoltingLib extends JavaPlugin implements Listener {
         this.glowManager = new JGlow(this);
 
         this.configurationFile = filesManager.createYML("configuration");
+
+        // Register the block break hologram listener
+        getServer().getPluginManager().registerEvents(new Listener() {
+
+            @EventHandler
+            public void onBlockBreak(org.bukkit.event.block.BlockBreakEvent event) {
+                var block = event.getBlock();
+                var location = block.getLocation().add(0.5, 1.5, 0.5);
+
+                String name = block.getType().name().toLowerCase().replace("_", " ");
+
+                new JHologramBuilder(location)
+                        .addLine("<#02d63b><bold>" + name + " <dark_red><italic>Test #2")
+                        .addLine("<dark_aqua><bold>Another cute line!")
+                        .setDuration(100)
+                        .setShadowed(true)
+                        .setAlignment(TextDisplay.TextAlignment.CENTER)
+                        .setFadeOutSpeed(1)
+                        .setFloatHeight(5)
+                        .build();
+            }
+
+        }, this);
 
         this.getLogger().log(Level.INFO, "[JoltingLib] Library has been enabled!");
     }

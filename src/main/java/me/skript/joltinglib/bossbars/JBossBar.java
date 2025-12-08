@@ -17,8 +17,6 @@ public final class JBossBar {
 
     private JBossBar() {}
 
-    // -------------------- Creation --------------------
-
     /**
      * Creates a new BossBar if it does not already exist.
      *

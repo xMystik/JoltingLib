@@ -1,6 +1,6 @@
 package me.skript.joltinglib.configurations;
 
-import me.skript.joltinglib.JDebug;
+import me.skript.joltinglib.utilities.JDebug;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;

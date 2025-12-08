@@ -1,4 +1,4 @@
-package me.skript.joltinglib;
+package me.skript.joltinglib.utilities;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 
