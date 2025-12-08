@@ -280,13 +280,14 @@ public class JHologramBuilder {
         Bukkit.getScheduler().runTaskTimer(JoltingLib.getInstance(), task -> {
             int now = tick.getAndIncrement();
 
+            // Remove
             if (now >= duration) {
-                if (display.isValid()) {
-                    task.cancel();
-                    return;
-                }
+                if (display != null && !display.isDead()) display.remove();
+                task.cancel();
+                return;
             }
 
+            // Fade-out
             if (fadeOut && now >= fadeStart) {
                 double progress = (double)(now - fadeStart) / fadeLength;
                 int opacity = (int)(255 - (progress * 255));
