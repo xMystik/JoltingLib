@@ -12,6 +12,7 @@ import org.bukkit.util.Transformation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Builder for creating fully customizable holograms using TextDisplay entity
@@ -37,11 +38,10 @@ public class JHologramBuilder {
 
     private double floatHeight = 0;
     private int floatDuration = 30;
-    private int fadeSpeed = 0;
+
+    private boolean fadeOut = false;
 
     private List<Player> viewers = new ArrayList<>();
-
-    private BukkitTask durationTask;
 
     /**
      * Creates a new hologram builder at the specified location
@@ -204,12 +204,12 @@ public class JHologramBuilder {
     }
 
     /**
-     * Sets how quickly the hologram should fade out
+     * Enables or disables automatic fade-out.
      *
-     * @param ticks Opacity decrease per tick (0–20)
+     * @param toggle true to fade-out, false for no fade animation
      */
-    public JHologramBuilder setFadeOutSpeed(int ticks) {
-        this.fadeSpeed = Math.max(0, Math.min(ticks, 20));
+    public JHologramBuilder setFadeOut(boolean toggle) {
+        this.fadeOut = toggle;
         return this;
     }
 
@@ -238,6 +238,7 @@ public class JHologramBuilder {
             display.text(full);
         }
 
+        // Settings
         display.setBillboard(pivot);
         display.setSeeThrough(seeThrough);
         display.setAlignment(alignment);
@@ -270,45 +271,34 @@ public class JHologramBuilder {
             }, 2L);
         }
 
-        // Fade
-        if (fadeSpeed > 0) {
-            Bukkit.getScheduler().runTaskTimer(JoltingLib.getInstance(), task -> {
-                if (!display.isValid()) {
+        // Fade & Duration
+        int fadeLength = fadeOut ? Math.min(40, duration) : 0;
+        int fadeStart = duration - fadeLength;
+
+        AtomicInteger tick = new AtomicInteger(0);
+
+        Bukkit.getScheduler().runTaskTimer(JoltingLib.getInstance(), task -> {
+            int now = tick.getAndIncrement();
+
+            if (now >= duration) {
+                if (display.isValid()) {
                     task.cancel();
                     return;
                 }
+            }
 
-                byte opacity = display.getTextOpacity();
+            if (fadeOut && now >= fadeStart) {
+                double progress = (double)(now - fadeStart) / fadeLength;
+                int opacity = (int)(255 - (progress * 255));
+                display.setTextOpacity((byte) opacity);
+            }
 
-                if (opacity <= -128) {
-                    display.setTextOpacity((byte) -128);
-
-                    if (durationTask != null) durationTask.cancel();
-
-                    display.text(Component.text(""));
-
-                    Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
-                        if (display != null && !display.isDead()) display.remove();
-                    }, 1L);
-
-                    task.cancel();
-                    return;
-                }
-                opacity -= (byte) fadeSpeed;
-                display.setTextOpacity(opacity);
-            }, 1L, 1L);
-        }
-
-        // Duration
-        if (duration > 0) {
-            durationTask = Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
-                if (display != null && !display.isDead()) display.remove();
-            }, duration);
-        }
+        }, 1L, 1L);
 
         // Viewers
         if (!viewers.isEmpty()) {
             display.setVisibleByDefault(false);
+
             for (Player viewer : viewers) {
                 if (viewer.isOnline()) {
                     viewer.showEntity(JoltingLib.getInstance(), display);

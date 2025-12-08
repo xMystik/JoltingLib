@@ -42,7 +42,6 @@ public final class JoltingLib extends JavaPlugin implements Listener {
                         .setDuration(100)
                         .setShadowed(true)
                         .setAlignment(TextDisplay.TextAlignment.CENTER)
-                        .setFadeOutSpeed(1)
                         .setFloatHeight(5)
                         .build();
             }
