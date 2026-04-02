@@ -192,14 +192,20 @@ public class JItemBuilder {
      * @return the current {@code JItemBuilder} instance for chaining
      */
     public JItemBuilder setPlayerSkull(UUID playerUUID) {
+//        if (meta instanceof SkullMeta skullMeta) {
+//            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+//            PlayerProfile profile = offlinePlayer.getPlayerProfile();
+//
+//            if (!offlinePlayer.isOnline()) {
+//                profile.complete(true);
+//            }
+//
+//            skullMeta.setPlayerProfile(profile);
+//            item.setItemMeta(skullMeta);
+//        }
+//        return this;
         if (meta instanceof SkullMeta skullMeta) {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
-            PlayerProfile profile = offlinePlayer.getPlayerProfile();
-
-            if (!offlinePlayer.isOnline()) {
-                profile.complete(true);
-            }
-
+            PlayerProfile profile = Bukkit.createProfile(playerUUID);
             skullMeta.setPlayerProfile(profile);
             item.setItemMeta(skullMeta);
         }
@@ -308,7 +314,8 @@ public class JItemBuilder {
             key = NamespacedKey.fromString(keyName);
         } else if (vanillaStyles.contains(keyName)) {
             // Default to Minecraft’s namespace for known tooltip colors
-            key = new NamespacedKey("minecraft", keyName);
+            // key = new NamespacedKey("minecraft", keyName);
+            key = NamespacedKey.minecraft(keyName);
         } else {
             // Otherwise, default to JoltingLib namespace
             key = new NamespacedKey("joltinglib", keyName);
