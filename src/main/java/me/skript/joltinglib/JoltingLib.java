@@ -3,6 +3,7 @@ package me.skript.joltinglib;
 import me.skript.joltinglib.configurations.JYML;
 import me.skript.joltinglib.configurations.JFilesManager;
 import me.skript.joltinglib.glow.JGlow;
+import me.skript.joltinglib.items.SkullCache;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,12 +16,16 @@ public final class JoltingLib extends JavaPlugin implements Listener {
     private JFilesManager filesManager = new JFilesManager<>(this);
     private JYML configurationFile;
     private JGlow glowManager;
+    private SkullCache skullCache;
 
     @Override
     public void onEnable() {
         instance = this;
         this.glowManager = new JGlow(this);
         this.configurationFile = filesManager.createYML("configuration");
+
+        this.skullCache = new SkullCache(this);
+        this.skullCache.preloadPlayers();
 
         this.getLogger().log(Level.INFO, "[JoltingLib] Library has been enabled!");
     }
@@ -38,5 +43,9 @@ public final class JoltingLib extends JavaPlugin implements Listener {
 
     public FileConfiguration getConfigurationFile() {
         return configurationFile.getConfig();
+    }
+
+    public SkullCache getSkullCache() {
+        return skullCache;
     }
 }

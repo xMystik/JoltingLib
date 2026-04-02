@@ -1,6 +1,7 @@
 package me.skript.joltinglib.items;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.text.JText;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -192,21 +193,18 @@ public class JItemBuilder {
      * @return the current {@code JItemBuilder} instance for chaining
      */
     public JItemBuilder setPlayerSkull(UUID playerUUID) {
-//        if (meta instanceof SkullMeta skullMeta) {
-//            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
-//            PlayerProfile profile = offlinePlayer.getPlayerProfile();
-//
-//            if (!offlinePlayer.isOnline()) {
-//                profile.complete(true);
-//            }
-//
-//            skullMeta.setPlayerProfile(profile);
-//            item.setItemMeta(skullMeta);
-//        }
-//        return this;
         if (meta instanceof SkullMeta skullMeta) {
-            PlayerProfile profile = Bukkit.createProfile(playerUUID);
-            skullMeta.setPlayerProfile(profile);
+
+            SkullCache cache = JoltingLib.getInstance().getSkullCache();
+            PlayerProfile cached = cache.get(playerUUID);
+
+            if (cached != null) {
+                skullMeta.setPlayerProfile(cached);
+            } else {
+                PlayerProfile profile = Bukkit.createProfile(playerUUID);
+                skullMeta.setPlayerProfile(profile);
+                cache.queue(playerUUID);
+            }
             item.setItemMeta(skullMeta);
         }
         return this;
