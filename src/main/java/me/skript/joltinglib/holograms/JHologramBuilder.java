@@ -7,7 +7,6 @@ import org.bukkit.*;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
 
 import java.util.ArrayList;
@@ -272,29 +271,36 @@ public class JHologramBuilder {
         }
 
         // Fade & Duration
-        int fadeLength = fadeOut ? Math.min(40, duration) : 0;
-        int fadeStart = duration - fadeLength;
+        if (duration < Integer.MAX_VALUE || fadeOut) {
+            int fadeLength = fadeOut ? Math.min(40, duration) : 0;
+            int fadeStart = duration - fadeLength;
 
-        AtomicInteger tick = new AtomicInteger(0);
+            AtomicInteger tick = new AtomicInteger(0);
 
-        Bukkit.getScheduler().runTaskTimer(JoltingLib.getInstance(), task -> {
-            int now = tick.getAndIncrement();
+            Bukkit.getScheduler().runTaskTimer(JoltingLib.getInstance(), task -> {
+                if (display == null || display.isDead() || !display.isValid()) {
+                    task.cancel();
+                    return;
+                }
 
-            // Remove
-            if (now >= duration) {
-                if (display != null && !display.isDead()) display.remove();
-                task.cancel();
-                return;
-            }
+                int now = tick.getAndIncrement();
 
-            // Fade-out
-            if (fadeOut && now >= fadeStart) {
-                double progress = (double)(now - fadeStart) / fadeLength;
-                int opacity = (int)(255 - (progress * 255));
-                display.setTextOpacity((byte) opacity);
-            }
+                // Remove
+                if (now >= duration) {
+                    display.remove();
+                    task.cancel();
+                    return;
+                }
 
-        }, 1L, 1L);
+                // Fade-out
+                if (fadeOut && now >= fadeStart && fadeLength > 0) {
+                    double progress = (double)(now - fadeStart) / fadeLength;
+                    int opacity = (int)(255 - (progress * 255));
+                    display.setTextOpacity((byte) opacity);
+                }
+
+            }, 1L, 1L);
+        }
 
         // Viewers
         if (!viewers.isEmpty()) {
