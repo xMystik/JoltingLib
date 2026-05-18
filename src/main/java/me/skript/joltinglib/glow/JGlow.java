@@ -10,13 +10,21 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class JGlow {
 
     private final GlowingEntities glowingEntities;
     private final GlowingBlocks glowingBlocks;
+    private final Map<String, Set<UUID>> hiddenNameplateViewers = new HashMap<>();
 
     public JGlow(JavaPlugin plugin) {
         this.glowingEntities = new GlowingEntities(plugin);
@@ -42,6 +50,14 @@ public class JGlow {
             glowingEntities.setGlowing(target, viewer, color);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void addGlowToPlayer(Player target, Player viewer, ChatColor color, boolean hideNameplate) {
+        addGlowToPlayer(target, viewer, color);
+
+        if (hideNameplate) {
+            hideGlowNameplate(target, viewer, color);
         }
     }
 
@@ -71,6 +87,27 @@ public class JGlow {
         }
     }
 
+    public void addGlowToPlayer(Player target, Player viewer, ChatColor color, long duration, boolean hideNameplate) {
+        try {
+            glowingEntities.setGlowing(target, viewer, color);
+
+            if (hideNameplate) {
+                hideGlowNameplate(target, viewer, color);
+            }
+
+            Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
+                try {
+                    glowingEntities.unsetGlowing(target, viewer);
+                    showGlowNameplateIfUnused(target, viewer);
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                }
+            }, duration * 20);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Adds a glowing effect to a target player for a list of viewers with a defined color
      *
@@ -82,6 +119,14 @@ public class JGlow {
         for (Player viewer : viewers) {
             if (viewer.isOnline()) {
                 addGlowToPlayer(target, viewer, color);
+            }
+        }
+    }
+
+    public void addGlowToPlayer(Player target, List<Player> viewers, ChatColor color, boolean hideNameplate) {
+        for (Player viewer : viewers) {
+            if (viewer.isOnline()) {
+                addGlowToPlayer(target, viewer, color, hideNameplate);
             }
         }
     }
@@ -99,6 +144,14 @@ public class JGlow {
         for (Player viewer : viewers) {
             if (viewer.isOnline()) {
                 addGlowToPlayer(target, viewer, color, duration);
+            }
+        }
+    }
+
+    public void addGlowToPlayer(Player target, List<Player> viewers, ChatColor color, long duration, boolean hideNameplate) {
+        for (Player viewer : viewers) {
+            if (viewer.isOnline()) {
+                addGlowToPlayer(target, viewer, color, duration, hideNameplate);
             }
         }
     }
@@ -152,6 +205,7 @@ public class JGlow {
     public void removeGlowFromPlayer(Player target, Player viewer) {
         try {
             glowingEntities.unsetGlowing(target, viewer);
+            showGlowNameplateIfUnused(target, viewer);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -187,6 +241,69 @@ public class JGlow {
                 }
             }
         }
+    }
+
+    private void hideGlowNameplate(Player target, Player viewer, ChatColor color) {
+        if (target == null || viewer == null || color == null || !color.isColor()) {
+            return;
+        }
+
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        String teamName = getGlowTeamName(target, color);
+        Team team = scoreboard.getTeam(teamName);
+
+        if (team == null) {
+            team = scoreboard.registerNewTeam(teamName);
+        }
+
+        team.setColor(color);
+        team.setAllowFriendlyFire(true);
+        team.setCanSeeFriendlyInvisibles(false);
+        team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+
+        if (!team.hasEntry(target.getName())) {
+            team.addEntry(target.getName());
+        }
+
+        hiddenNameplateViewers.computeIfAbsent(teamName, ignored -> new HashSet<>()).add(viewer.getUniqueId());
+    }
+
+    private void showGlowNameplateIfUnused(Player target, Player viewer) {
+        if (target == null || viewer == null) {
+            return;
+        }
+
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+
+        for (String teamName : new HashSet<>(hiddenNameplateViewers.keySet())) {
+            if (!teamName.startsWith("glow-" + target.getEntityId())) {
+                continue;
+            }
+
+            Set<UUID> viewers = hiddenNameplateViewers.get(teamName);
+            if (viewers == null) {
+                continue;
+            }
+
+            viewers.remove(viewer.getUniqueId());
+            if (!viewers.isEmpty()) {
+                continue;
+            }
+
+            hiddenNameplateViewers.remove(teamName);
+            Team team = scoreboard.getTeam(teamName);
+            if (team != null) {
+                team.removeEntry(target.getName());
+                if (team.getEntries().isEmpty()) {
+                    team.unregister();
+                }
+            }
+        }
+    }
+
+    private String getGlowTeamName(Player target, ChatColor color) {
+        return "glow-" + target.getEntityId() + color.getChar();
     }
 
     //////////////-----------------------------------------------------BLOCKS---------------------------------------------------------------///////////
