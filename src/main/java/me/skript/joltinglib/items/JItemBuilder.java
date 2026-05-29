@@ -1,6 +1,7 @@
 package me.skript.joltinglib.items;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.google.common.collect.LinkedHashMultimap;
 import me.skript.joltinglib.JoltingLib;
 import me.skript.joltinglib.text.JText;
 import net.kyori.adventure.text.Component;
@@ -270,6 +271,33 @@ public class JItemBuilder {
     }
 
     /**
+     * Hides normal vanilla tooltip clutter while keeping the item name and custom lore visible.
+     * <p>
+     * This adds every available {@link ItemFlag} and clears default attribute modifiers, so
+     * menu icons made from armor or tools will not show vanilla lines such as "+6 Armor".
+     * It does not enable Minecraft's full hide_tooltip component.
+     *
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder hideItemFlags() {
+        meta.addItemFlags(ItemFlag.values());
+        meta.setAttributeModifiers(LinkedHashMultimap.create());
+        return this;
+    }
+
+    /**
+     * Sets Minecraft's full hide_tooltip component.
+     * <p>
+     * Use this only when the entire tooltip should be hidden, including custom lore.
+     *
+     * @param hideTooltip true to hide the full tooltip, false to show it again
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder hideTooltip(boolean hideTooltip) {
+        meta.setHideTooltip(hideTooltip);
+        return this;
+    }
+/**
      * Sets whether the item is unbreakable
      *
      * @param unbreakable true to make the item unbreakable, false otherwise
@@ -311,7 +339,7 @@ public class JItemBuilder {
             // User provided full namespace, e.g. "minecraft:white" or "custom:my_style"
             key = NamespacedKey.fromString(keyName);
         } else if (vanillaStyles.contains(keyName)) {
-            // Default to Minecraft’s namespace for known tooltip colors
+            // Default to MinecraftÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢s namespace for known tooltip colors
             // key = new NamespacedKey("minecraft", keyName);
             key = NamespacedKey.minecraft(keyName);
         } else {

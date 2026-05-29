@@ -45,6 +45,10 @@ public class JGlow {
      * @param viewer the player who will see the glowing effect
      */
     public void addGlowToPlayer(Player target, Player viewer) {
+        if (!canAddPlayerGlow(target, viewer)) {
+            return;
+        }
+
         try {
             glowingEntities.setGlowing(target, viewer);
         } catch (ReflectiveOperationException e) {
@@ -61,11 +65,19 @@ public class JGlow {
      * @param duration the duration (in seconds) for which the glowing effect will last
      */
     public void addGlowToPlayer(Player target, Player viewer, long duration) {
+        if (!canAddPlayerGlow(target, viewer)) {
+            return;
+        }
+
         try {
             glowingEntities.setGlowing(target, viewer);
 
             // Schedule the removal of the glow effect after the specified duration
             Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
+                if (!canSendTo(viewer)) {
+                    return;
+                }
+
                 try {
                     glowingEntities.unsetGlowing(target, viewer);
                 } catch (ReflectiveOperationException e) {
@@ -153,6 +165,10 @@ public class JGlow {
      * @param viewer the player who will no longer see the glowing effect
      */
     public void removeGlowFromPlayer(Player target, Player viewer) {
+        if (target == null || !canSendTo(viewer)) {
+            return;
+        }
+
         try {
             glowingEntities.unsetGlowing(target, viewer);
         } catch (ReflectiveOperationException e) {
@@ -204,6 +220,10 @@ public class JGlow {
      * @param color the color of the glowing effect
      */
     public void addGlowToBlock(Block block, Player receiver, ChatColor color) {
+        if (!canSendTo(receiver)) {
+            return;
+        }
+
         try {
             if (isAllowedBlock(block)) {
                 glowingBlocks.setGlowing(block, receiver, color);
@@ -256,6 +276,10 @@ public class JGlow {
      * @param duration the duration (in seconds) for which the block will glow
      */
     public void addGlowToBlock(Block block, Player receiver, ChatColor color, long duration) {
+        if (!canSendTo(receiver)) {
+            return;
+        }
+
         try {
             // Check if the block is solid and has a visible texture
             if (isAllowedBlock(block)) {
@@ -264,6 +288,10 @@ public class JGlow {
 
                 // Schedule the removal of the glow after the specified duration
                 Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
+                    if (!canSendTo(receiver)) {
+                        return;
+                    }
+
                     try {
                         glowingBlocks.unsetGlowing(block, receiver);  // Remove the glow after the duration
                     } catch (ReflectiveOperationException e) {
@@ -332,6 +360,10 @@ public class JGlow {
      * @param receiver the player who will no longer see the glowing effect
      */
     public void removeGlowFromBlock(Block block, Player receiver) {
+        if (!canSendTo(receiver)) {
+            return;
+        }
+
         try {
             glowingBlocks.unsetGlowing(block, receiver);
         } catch (ReflectiveOperationException e) {
@@ -374,6 +406,10 @@ public class JGlow {
      * @param color the color of the glowing effect
      */
     public void addGlowToEntity(Entity entity, Player receiver, ChatColor color) {
+        if (entity == null || !canSendTo(receiver)) {
+            return;
+        }
+
         try {
             glowingEntities.setGlowing(entity, receiver, color);
         } catch (ReflectiveOperationException e) {
@@ -419,10 +455,18 @@ public class JGlow {
      * @param duration the duration (in seconds) for which the entity will glow
      */
     public void addGlowToEntity(Entity entity, Player receiver, ChatColor color, long duration) {
+        if (entity == null || !canSendTo(receiver)) {
+            return;
+        }
+
         try {
             glowingEntities.setGlowing(entity, receiver, color);
 
             Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
+                if (!canSendTo(receiver)) {
+                    return;
+                }
+
                 try {
                     glowingEntities.unsetGlowing(entity, receiver);
                 } catch (ReflectiveOperationException e) {
@@ -473,6 +517,10 @@ public class JGlow {
      * @param receiver the player who will no longer see the glowing effect
      */
     public void removeGlowFromEntity(Entity entity, Player receiver) {
+        if (entity == null || !canSendTo(receiver)) {
+            return;
+        }
+
         try {
             glowingEntities.unsetGlowing(entity, receiver);
         } catch (ReflectiveOperationException e) {
@@ -530,5 +578,13 @@ public class JGlow {
         for (Entity entity : entities) {
             removeGlowFromEntity(entity);
         }
+    }
+
+    private boolean canAddPlayerGlow(Player target, Player viewer) {
+        return target != null && target.isOnline() && canSendTo(viewer);
+    }
+
+    private boolean canSendTo(Player viewer) {
+        return viewer != null && viewer.isOnline();
     }
 }
