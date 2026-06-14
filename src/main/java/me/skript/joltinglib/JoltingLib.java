@@ -32,7 +32,9 @@ public final class JoltingLib extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        glowManager.disable();
+        if (glowManager != null) {
+            glowManager.disable();
+        }
 
         this.getLogger().log(Level.INFO, "[JoltingLib] Library has been disabled!");
     }

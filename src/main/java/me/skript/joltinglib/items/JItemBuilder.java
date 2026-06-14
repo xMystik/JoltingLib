@@ -223,6 +223,17 @@ public class JItemBuilder {
     }
 
     /**
+     * Sets the item model data for the item
+     *
+     * @param key the namespaced key
+     * @return the current {@code JItemBuilder} instance for chaining
+     */
+    public JItemBuilder setItemModel(NamespacedKey key) {
+        meta.setItemModel(key);
+        return this;
+    }
+
+    /**
      * Sets the amount of items in the stack
      *
      * @param amount the amount, limited between 1 and 64
