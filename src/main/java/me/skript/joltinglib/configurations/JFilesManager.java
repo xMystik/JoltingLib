@@ -4,6 +4,9 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.util.*;
+import java.net.URISyntaxException;
+import java.nio.file.*;
+import java.util.jar.JarFile;
 
 public class JFilesManager<P extends Plugin> {
 
@@ -18,6 +21,87 @@ public class JFilesManager<P extends Plugin> {
     public JFilesManager(P plugin) {
         this.plugin = plugin;
         this.filesMap = new HashMap<>();
+    }
+
+    /**
+     * Copies a bundled resource folder (including subfolders) to the same relative
+     * location in this plugin's data folder. Existing files are never overwritten.
+     * For example, "Menus" copies resources/Menus/** to plugins/YourPlugin/Menus/**.
+     * Safe to call on every startup; newly bundled files are added automatically.
+     * @return number of new files copied (not directories)
+     * @throws IllegalArgumentException if the resource path is invalid or missing
+     * @throws IllegalStateException if the resources cannot be copied
+     */
+    public int saveResourceFolder(String resourceFolder) {
+        try {
+            Path source = Paths.get(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+            return copyResourceFolder(source, plugin.getDataFolder().toPath(), resourceFolder);
+        } catch (IOException | URISyntaxException exception) {
+            throw new IllegalStateException("Could not copy resource folder '" + resourceFolder + "'", exception);
+        }
+    }
+
+    // Package-private so real JAR extraction can be tested without a running server.
+    static int copyResourceFolder(Path source, Path destination, String folder) throws IOException {
+        Objects.requireNonNull(folder, "resourceFolder");
+        folder = folder.replace('\\', '/').replaceAll("/+$", "");
+        if (folder.isBlank() || folder.startsWith("/") || folder.contains(":"))
+            throw new IllegalArgumentException("Use a non-empty relative resource folder");
+        for (String segment : folder.split("/", -1)) {
+            if (segment.isEmpty() || segment.equals(".") || segment.equals(".."))
+                throw new IllegalArgumentException("Invalid resource folder: " + folder);
+        }
+        Path root = destination.toAbsolutePath().normalize();
+        String prefix = folder + "/";
+        int copied = 0;
+        boolean found = false;
+        if (Files.isDirectory(source)) {
+            Path resourceRoot = source.resolve(folder);
+            if (!Files.isDirectory(resourceRoot)) throw new IllegalArgumentException("Missing resource folder: " + folder);
+            try (var paths = Files.walk(resourceRoot)) {
+                for (Path path : paths.toList()) {
+                    if (Files.isSymbolicLink(path)) throw new IOException("Symbolic links are not supported in resources: " + path);
+                    String name = source.relativize(path).toString().replace(File.separatorChar, '/');
+                    Path target = resourceTarget(root, name);
+                    if (Files.isDirectory(path)) Files.createDirectories(target);
+                    else try (InputStream input = Files.newInputStream(path)) { copied += copyDefault(input, target); }
+                }
+            }
+            return copied;
+        }
+        try (JarFile jar = new JarFile(source.toFile())) {
+            var entries = jar.entries();
+            while (entries.hasMoreElements()) {
+                var entry = entries.nextElement();
+                if (!entry.getName().startsWith(prefix)) continue;
+                found = true;
+                Path target = resourceTarget(root, entry.getName());
+                if (entry.isDirectory()) Files.createDirectories(target);
+                else try (InputStream input = jar.getInputStream(entry)) { copied += copyDefault(input, target); }
+            }
+        }
+        if (!found) throw new IllegalArgumentException("Missing resource folder: " + folder);
+        return copied;
+    }
+
+    private static Path resourceTarget(Path root, String name) throws IOException {
+        if (name.contains("\\") || name.contains(":")) throw new IOException("Invalid resource entry: " + name);
+        for (String segment : name.split("/")) {
+            if (segment.equals("..") || segment.equals(".")) throw new IOException("Invalid resource entry: " + name);
+        }
+        Path target = root.resolve(name).normalize();
+        if (!target.startsWith(root)) throw new IOException("Resource escapes the data folder: " + name);
+        for (Path path = target; path != null; path = path.getParent()) {
+            if (Files.isSymbolicLink(path)) throw new IOException("Refusing to copy through a symbolic link: " + path);
+        }
+        return target;
+    }
+
+    private static int copyDefault(InputStream input, Path target) throws IOException {
+        if (Files.isDirectory(target)) throw new IOException("A directory occupies the resource file path: " + target);
+        Files.createDirectories(target.getParent());
+        try { Files.copy(input, target); return 1; }
+        catch (FileAlreadyExistsException ignored) { return 0; }
     }
 
     /**

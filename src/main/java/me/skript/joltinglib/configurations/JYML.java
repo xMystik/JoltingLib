@@ -7,7 +7,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 
 public class JYML<P extends Plugin> {
@@ -80,11 +79,16 @@ public class JYML<P extends Plugin> {
     protected void setupFile(String fileName) {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            InputStream defaultFile = plugin.getResource(fileName + ".yml");
+            String resourcePath = plugin.getDataFolder().toPath().relativize(file.toPath())
+                    .toString().replace(File.separatorChar, '/');
+            InputStream defaultFile = plugin.getResource(resourcePath);
+            // Preserve plugins which historically kept nested YAML defaults at the JAR root.
+            if (defaultFile == null && !resourcePath.equals(fileName + ".yml"))
+                defaultFile = plugin.getResource(fileName + ".yml");
 
             if (defaultFile != null) {
-                try {
-                    Files.copy(defaultFile, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                try (InputStream input = defaultFile) {
+                    Files.copy(input, file.toPath());
                 } catch (IOException e) {
                     JDebug.log(Level.SEVERE, "Failed to copy default YAML file: " + file.getName() + ". Error: " + e.getMessage());
                 }

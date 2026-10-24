@@ -3,13 +3,19 @@ package me.skript.joltinglib.toasts;
 import me.skript.joltinglib.JoltingLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.advancement.Advancement;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.Locale;
+import org.bukkit.NamespacedKey;
+import org.bukkit.advancement.Advancement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import me.skript.joltinglib.text.JText;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 public class JToast {
     /** Existing material-only calls remain compatible. */
@@ -31,10 +37,8 @@ public class JToast {
         Objects.requireNonNull(type, "type");
         Objects.requireNonNull(icon, "icon");
         Objects.requireNonNull(message, "message");
-        if (icon.getType().isAir() || !icon.getType().isItem()) throw new IllegalArgumentException("Toast icon must be an item");
-        if (message.isBlank() || message.length() > 512) throw new IllegalArgumentException("Toast text must contain 1-512 characters");
-        ItemStack snapshot = icon.clone();
-        snapshot.setAmount(1);
+        validateMessage(message);
+        ItemStack snapshot = snapshot(icon);
         Runnable delivery = () -> {
             if (!player.isOnline()) return;
             try {
@@ -58,12 +62,53 @@ public class JToast {
         icon.editMeta(meta -> meta.setCustomModelData(model == 0 ? null : model));
     }
 
+    static ItemStack snapshot(ItemStack icon) {
+        Objects.requireNonNull(icon, "icon");
+        if (icon.getType().isAir() || !icon.getType().isItem()) throw new IllegalArgumentException("Toast icon must be an item");
+        ItemStack snapshot = icon.clone();
+        snapshot.setAmount(1);
+        return snapshot;
+    }
+
+    static void validateMessage(String message) {
+        Objects.requireNonNull(message, "message");
+        if (message.isBlank() || message.length() > 512) throw new IllegalArgumentException("Toast text must contain 1-512 characters");
+    }
+
+    /** Creates the toast representation; Core owns caching and player preferences. */
+    public static String createPayload(JToastType type, ItemStack icon, String message) {
+        Objects.requireNonNull(type, "type");
+        validateMessage(message);
+        return payload(type, Bukkit.getUnsafe().serializeItemAsJson(snapshot(icon)), message);
+    }
+
+    static String payload(JToastType type, JsonObject icon, String message) {
+        JsonObject display = new JsonObject();
+        display.add("icon", icon.deepCopy());
+        display.add("title", JsonParser.parseString(GsonComponentSerializer.gson().serialize(
+                JText.format(message.replace("|", "<newline>")))));
+        display.addProperty("description", "");
+        display.addProperty("frame", type.name().toLowerCase(Locale.ROOT));
+        display.addProperty("show_toast", true);
+        display.addProperty("announce_to_chat", false);
+        display.addProperty("hidden", true);
+        JsonObject trigger = new JsonObject();
+        trigger.addProperty("trigger", "minecraft:impossible");
+        JsonObject criteria = new JsonObject();
+        criteria.add("notification", trigger);
+        JsonObject payload = new JsonObject();
+        payload.add("display", display);
+        payload.add("criteria", criteria);
+        JsonArray group = new JsonArray(); group.add("notification");
+        JsonArray requirements = new JsonArray(); requirements.add(group);
+        payload.add("requirements", requirements);
+        return payload.toString();
+    }
+
     private static void sendStandalone(Player player, JToastType type, ItemStack icon, String message) {
         NamespacedKey key = new NamespacedKey(JoltingLib.getInstance(), UUID.randomUUID().toString());
-        Advancement advancement = Bukkit.getUnsafe().loadAdvancement(key,
-                JToastPayload.json(type, Bukkit.getUnsafe().serializeItemAsJson(icon), message));
+        Advancement advancement = Bukkit.getUnsafe().loadAdvancement(key, createPayload(type, icon, message));
         if (advancement == null) return;
-        // Paper retains the runtime advancement; remove its generated disk file immediately.
         Bukkit.getUnsafe().removeAdvancement(key);
         player.getAdvancementProgress(advancement).awardCriteria("notification");
         Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
@@ -71,3 +116,4 @@ public class JToast {
         }, 40L);
     }
 }
+

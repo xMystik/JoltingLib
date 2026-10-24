@@ -11,19 +11,25 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JToastTest {
+    @Test void payloadRequiresOnlyTheNotificationCriterion() {
+        JsonObject payload = JsonParser.parseString(JToast.payload(JToastType.TASK, icon(), "Test")).getAsJsonObject();
+        assertEquals("notification", payload.getAsJsonArray("requirements").get(0).getAsJsonArray().get(0).getAsString());
+        assertEquals(1, payload.getAsJsonObject("criteria").size());
+    }
+
     private JsonObject icon() {
         return JsonParser.parseString("{\"id\":\"minecraft:charcoal\",\"count\":1,\"components\":{\"minecraft:custom_model_data\":{\"floats\":[117.0]}}}").getAsJsonObject();
     }
 
     @Test void preservesCustomModelComponents() {
         JsonObject item = icon();
-        JsonObject display = JsonParser.parseString(JToastPayload.json(JToastType.TASK, item, "Test")).getAsJsonObject().getAsJsonObject("display");
+        JsonObject display = JsonParser.parseString(JToast.payload(JToastType.TASK, item, "Test")).getAsJsonObject().getAsJsonObject("display");
         assertEquals(item, display.getAsJsonObject("icon"));
         assertEquals(117f, display.getAsJsonObject("icon").getAsJsonObject("components").getAsJsonObject("minecraft:custom_model_data").getAsJsonArray("floats").get(0).getAsFloat());
     }
 
     @Test void escapesTextAndSupportsLineBreaksAndColors() {
-        JsonObject display = JsonParser.parseString(JToastPayload.json(JToastType.GOAL, icon(), "<yellow>A \"quote\"|C:\\icons")).getAsJsonObject().getAsJsonObject("display");
+        JsonObject display = JsonParser.parseString(JToast.payload(JToastType.GOAL, icon(), "<yellow>A \"quote\"|C:\\icons")).getAsJsonObject().getAsJsonObject("display");
         String plain = PlainTextComponentSerializer.plainText().serialize(GsonComponentSerializer.gson().deserialize(display.get("title").toString()));
         assertEquals("A \"quote\"\nC:\\icons", plain);
         assertTrue(display.get("title").toString().contains("yellow"));
@@ -31,7 +37,7 @@ class JToastTest {
 
     @Test void mapsAllFramesAndDisablesChatAnnouncement() {
         for (JToastType frame : JToastType.values()) {
-            JsonObject payload = JsonParser.parseString(JToastPayload.json(frame, icon(), "Hello")).getAsJsonObject();
+            JsonObject payload = JsonParser.parseString(JToast.payload(frame, icon(), "Hello")).getAsJsonObject();
             JsonObject display = payload.getAsJsonObject("display");
             assertEquals(frame.name().toLowerCase(java.util.Locale.ROOT), display.get("frame").getAsString());
             assertTrue(display.get("show_toast").getAsBoolean());
