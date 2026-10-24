@@ -1,115 +1,73 @@
 package me.skript.joltinglib.toasts;
 
-import me.skript.joltinglib.utilities.JDebug;
 import me.skript.joltinglib.JoltingLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class JToast {
-
-    private final NamespacedKey key;
-    private final String icon;
-    private final String message;
-    private final JToastType type;
-
-    /**
-     * Sends a Toast message towards a player
-     *
-     * @param player receiver of the message
-     * @param type {@link JToastType} one of the available types
-     * @param icon the Material that'll represent the message
-     * @param message the message after the introduction of the Toast
-     */
-    protected static void sendToast(Player player, JToastType type, Material icon, String message) {
-        new JToast(type, icon.name(), message).setup(player);
+    /** Existing material-only calls remain compatible. */
+    public static void sendToast(Player player, JToastType type, Material icon, String message) {
+        sendToast(player, type, new ItemStack(Objects.requireNonNull(icon, "icon")), message);
     }
 
-    private JToast(JToastType type, String icon, String message) {
-        this.key = new NamespacedKey(JoltingLib.getInstance(), UUID.randomUUID().toString());
-        this.type = type;
-        this.icon = icon;
-        this.message = message;
+    /** Custom model data of 0 means no custom model. */
+    public static void sendToast(Player player, JToastType type, Material icon, int customModelData, String message) {
+        if (customModelData < 0) throw new IllegalArgumentException("Custom model data cannot be negative");
+        ItemStack stack = new ItemStack(Objects.requireNonNull(icon, "icon"));
+        applyModelData(stack, customModelData);
+        sendToast(player, type, stack, message);
     }
 
-    private void setup(Player player) {
-        createAdvancement();
-        grantAdvancement(player);
-
-        Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> revokeAdvancement(player), 5 );
+    /** Sends a snapshot of a complete icon, including Nexo/custom item components. */
+    public static void sendToast(Player player, JToastType type, ItemStack icon, String message) {
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(icon, "icon");
+        Objects.requireNonNull(message, "message");
+        if (icon.getType().isAir() || !icon.getType().isItem()) throw new IllegalArgumentException("Toast icon must be an item");
+        if (message.isBlank() || message.length() > 512) throw new IllegalArgumentException("Toast text must contain 1-512 characters");
+        ItemStack snapshot = icon.clone();
+        snapshot.setAmount(1);
+        Runnable delivery = () -> {
+            if (!player.isOnline()) return;
+            try {
+                JToastService service = Bukkit.getServicesManager().load(JToastService.class);
+                if (service != null) {
+                    service.sendToast(player, type, snapshot, message);
+                    return; // A muted notification must never fall back to another transport.
+                }
+                sendStandalone(player, type, snapshot, message);
+            } catch (Exception exception) {
+                JoltingLib.getInstance().getLogger().warning("Could not deliver toast: " + exception.getMessage());
+            }
+        };
+        if (Bukkit.isPrimaryThread()) delivery.run();
+        else Bukkit.getScheduler().runTask(JoltingLib.getInstance(), delivery);
     }
 
-    private void createAdvancement() {
-        if(JDebug.isVersionAtLeast("1.21")) {
-            // Implements new format in case of 1.21+ server version.
-
-            Bukkit.getUnsafe().loadAdvancement(key, "{\n" +
-                    "    \"display\": {\n" +
-                    "        \"icon\": {\n" +
-                    "            \"id\": \"minecraft:" + icon.toLowerCase() + "\",\n" +
-                    "            \"count\": 1\n" +
-                    "        },\n" +
-                    "        \"title\": {\n" +
-                    "            \"text\": \"" + message.replace("|", "\\n") + "\"\n" +
-                    "        },\n" +
-                    "        \"description\": {\n" +
-                    "            \"text\": \"\"\n" +
-                    "        },\n" +
-                    "        \"background\": \"minecraft:textures/gui/advancements/backgrounds/adventure.png\",\n" +
-                    "        \"frame\": \"" + type.toString().toLowerCase() + "\",\n" +
-                    "        \"show_toast\": true,\n" +
-                    "        \"announce_to_chat\": false,\n" +
-                    "        \"hidden\": true\n" +
-                    "    },\n" +
-                    "    \"criteria\": {\n" +
-                    "        \"trigger\": {\n" +
-                    "            \"trigger\": \"minecraft:impossible\"\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "}");
-        } else {
-            // Implements older format in case of 1.20 and below server version.
-
-            Bukkit.getUnsafe().loadAdvancement(key, "{\n" +
-                    "    \"criteria\": {\n" +
-                    "        \"trigger\": {\n" +
-                    "            \"trigger\": \"minecraft:impossible\"\n" +
-                    "        }\n" +
-                    "    },\n" +
-                    "    \"display\": {\n" +
-                    "        \"icon\": {\n" +
-                    "            \"item\": \"minecraft:" + icon.toLowerCase() + "\"\n" +
-                    "        },\n" +
-                    "        \"title\": {\n" +
-                    "            \"text\": \"" + message.replace("|", "\n") + "\"\n" +
-                    "        },\n" +
-                    "        \"description\": {\n" +
-                    "            \"text\": \"\"\n" +
-                    "        },\n" +
-                    "        \"background\": \"minecraft:textures/gui/advancements/backgrounds/adventure.png\",\n" +
-                    "        \"frame\": \"" + type.toString().toLowerCase() + "\",\n" +
-                    "        \"announce_to_chat\": false,\n" +
-                    "        \"show_toast\": true,\n" +
-                    "        \"hidden\": true\n" +
-                    "    },\n" +
-                    "    \"requirements\": [\n" +
-                    "        [\n" +
-                    "            \"trigger\"\n" +
-                    "        ]\n" +
-                    "    ]\n" +
-                    "}");
-        }
+    static void applyModelData(ItemStack icon, Integer model) {
+        if (model == null) return;
+        if (model < 0) throw new IllegalArgumentException("Custom model data cannot be negative");
+        icon.editMeta(meta -> meta.setCustomModelData(model == 0 ? null : model));
     }
 
-    private void grantAdvancement(Player player) {
-        player.getAdvancementProgress(Bukkit.getAdvancement(key)).awardCriteria("trigger");
+    private static void sendStandalone(Player player, JToastType type, ItemStack icon, String message) {
+        NamespacedKey key = new NamespacedKey(JoltingLib.getInstance(), UUID.randomUUID().toString());
+        Advancement advancement = Bukkit.getUnsafe().loadAdvancement(key,
+                JToastPayload.json(type, Bukkit.getUnsafe().serializeItemAsJson(icon), message));
+        if (advancement == null) return;
+        // Paper retains the runtime advancement; remove its generated disk file immediately.
+        Bukkit.getUnsafe().removeAdvancement(key);
+        player.getAdvancementProgress(advancement).awardCriteria("notification");
+        Bukkit.getScheduler().runTaskLater(JoltingLib.getInstance(), () -> {
+            if (player.isOnline()) player.getAdvancementProgress(advancement).revokeCriteria("notification");
+        }, 40L);
     }
-
-    private void revokeAdvancement(Player player) {
-        player.getAdvancementProgress(Bukkit.getAdvancement(key)).revokeCriteria("trigger");
-    }
-
 }

@@ -1,5 +1,5 @@
 name: JoltingLib
-version: '1.2.0'
+version: '1.2.2'
 main: me.skript.joltinglib.JoltingLib
 api-version: '1.21'
 authors: [ Skript ]
